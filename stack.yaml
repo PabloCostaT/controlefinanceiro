@@ -1,0 +1,207 @@
+version: "3.7"
+
+services:
+  expense_tracker_app:
+    image: expense-tracker:latest
+    networks:
+      - network_public
+    environment:
+      - NODE_ENV=production
+      - NEXTAUTH_URL=https://despesas.seulimacasafacil.com.br
+      - NEXTAUTH_SECRET=your-nextauth-secret-key-here
+      - DATABASE_URL=postgresql://postgres:TxFEUjXbqEfbaawTVmdE@postgres:5432/expense_tracker
+      - REDIS_URL=redis://redis:6379/3
+      - NEXT_PUBLIC_APP_URL=https://despesas.seulimacasafacil.com.br
+      - NEXT_PUBLIC_API_URL=https://despesas.seulimacasafacil.com.br/api
+      - TZ=America/Sao_Paulo
+      - GENERIC_TIMEZONE=America/Sao_Paulo
+      - JWT_SECRET=your-jwt-secret-key-here
+      - ENCRYPTION_KEY=your-encryption-key-here
+      - SMTP_HOST=smtp.gmail.com
+      - SMTP_PORT=587
+      - SMTP_USER=your-email@gmail.com
+      - SMTP_PASS=your-app-password
+      - SMTP_FROM=noreply@seulimacasafacil.com.br
+      - S3_ENABLED=true
+      - S3_ACCESS_KEY=admin
+      - S3_SECRET_KEY=TxFEUjXbqEfbaawTVmdE
+      - S3_BUCKET=expense-tracker
+      - S3_ENDPOINT=minioapi.seulimacasafacil.com.br
+      - S3_PORT=443
+      - S3_USE_SSL=true
+      - BACKUP_ENABLED=true
+      - BACKUP_SCHEDULE=0 2 * * *
+      - LOG_LEVEL=info
+      - RATE_LIMIT_ENABLED=true
+      - RATE_LIMIT_MAX=100
+      - RATE_LIMIT_WINDOW=900000
+    volumes:
+      - expense_tracker_uploads:/app/uploads
+      - expense_tracker_backups:/app/backups
+    deploy:
+      mode: replicated
+      replicas: 2
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 2048M
+        reservations:
+          cpus: "0.5"
+          memory: 1024M
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: rollback
+        order: start-first
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.expense_tracker_app.rule=Host(`despesas.seulimacasafacil.com.br`)
+        - traefik.http.routers.expense_tracker_app.entrypoints=websecure
+        - traefik.http.routers.expense_tracker_app.priority=1
+        - traefik.http.routers.expense_tracker_app.tls.certresolver=letsencrypt
+        - traefik.http.routers.expense_tracker_app.service=expense_tracker_app
+        - traefik.http.services.expense_tracker_app.loadbalancer.server.port=3000
+        - traefik.http.services.expense_tracker_app.loadbalancer.passHostHeader=true
+        - traefik.http.services.expense_tracker_app.loadbalancer.healthcheck.path=/api/health
+        - traefik.http.services.expense_tracker_app.loadbalancer.healthcheck.interval=30s
+        - traefik.http.services.expense_tracker_app.loadbalancer.healthcheck.timeout=5s
+        - traefik.http.middlewares.expense-tracker-compress.compress=true
+        - traefik.http.middlewares.expense-tracker-ratelimit.ratelimit.burst=50
+        - traefik.http.middlewares.expense-tracker-ratelimit.ratelimit.average=10
+        - traefik.http.routers.expense_tracker_app.middlewares=expense-tracker-compress,expense-tracker-ratelimit
+
+  expense_tracker_api:
+    image: expense-tracker:latest
+    command: ["npm", "run", "start:api"]
+    networks:
+      - network_public
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://postgres:TxFEUjXbqEfbaawTVmdE@postgres:5432/expense_tracker
+      - REDIS_URL=redis://redis:6379/3
+      - JWT_SECRET=your-jwt-secret-key-here
+      - ENCRYPTION_KEY=your-encryption-key-here
+      - TZ=America/Sao_Paulo
+      - GENERIC_TIMEZONE=America/Sao_Paulo
+      - API_RATE_LIMIT_MAX=200
+      - API_RATE_LIMIT_WINDOW=900000
+      - LOG_LEVEL=info
+      - CORS_ORIGIN=https://despesas.seulimacasafacil.com.br
+    deploy:
+      mode: replicated
+      replicas: 2
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 1024M
+        reservations:
+          cpus: "0.25"
+          memory: 512M
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.expense_tracker_api.rule=Host(`api-despesas.seulimacasafacil.com.br`)
+        - traefik.http.routers.expense_tracker_api.entrypoints=websecure
+        - traefik.http.routers.expense_tracker_api.priority=1
+        - traefik.http.routers.expense_tracker_api.tls.certresolver=letsencrypt
+        - traefik.http.routers.expense_tracker_api.service=expense_tracker_api
+        - traefik.http.services.expense_tracker_api.loadbalancer.server.port=3001
+        - traefik.http.services.expense_tracker_api.loadbalancer.passHostHeader=true
+        - traefik.http.services.expense_tracker_api.loadbalancer.healthcheck.path=/health
+        - traefik.http.middlewares.api-cors.headers.accesscontrolallowmethods=GET,POST,PUT,DELETE,OPTIONS
+        - traefik.http.middlewares.api-cors.headers.accesscontrolalloworigin=https://despesas.seulimacasafacil.com.br
+        - traefik.http.middlewares.api-cors.headers.accesscontrolallowheaders=Content-Type,Authorization
+        - traefik.http.routers.expense_tracker_api.middlewares=api-cors
+
+  expense_tracker_worker:
+    image: expense-tracker:latest
+    command: ["npm", "run", "start:worker"]
+    networks:
+      - network_public
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://postgres:TxFEUjXbqEfbaawTVmdE@postgres:5432/expense_tracker
+      - REDIS_URL=redis://redis:6379/3
+      - WORKER_CONCURRENCY=5
+      - QUEUE_NAME=expense-tracker-jobs
+      - TZ=America/Sao_Paulo
+      - GENERIC_TIMEZONE=America/Sao_Paulo
+      - LOG_LEVEL=info
+      - SMTP_HOST=smtp.gmail.com
+      - SMTP_PORT=587
+      - SMTP_USER=your-email@gmail.com
+      - SMTP_PASS=your-app-password
+      - BACKUP_ENABLED=true
+      - BACKUP_SCHEDULE=0 2 * * *
+      - CLEANUP_SCHEDULE=0 3 * * 0
+    volumes:
+      - expense_tracker_backups:/app/backups
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 1024M
+        reservations:
+          cpus: "0.25"
+          memory: 512M
+
+  expense_tracker_cron:
+    image: expense-tracker:latest
+    command: ["npm", "run", "start:cron"]
+    networks:
+      - network_public
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://postgres:TxFEUjXbqEfbaawTVmdE@postgres:5432/expense_tracker
+      - REDIS_URL=redis://redis:6379/3
+      - TZ=America/Sao_Paulo
+      - GENERIC_TIMEZONE=America/Sao_Paulo
+      - LOG_LEVEL=info
+      - RECURRING_EXPENSES_SCHEDULE=0 0 * * *
+      - NOTIFICATIONS_SCHEDULE=0 9 * * *
+      - CLEANUP_SCHEDULE=0 2 * * 0
+      - BACKUP_SCHEDULE=0 3 * * *
+      - REPORTS_SCHEDULE=0 8 1 * *
+    volumes:
+      - expense_tracker_backups:/app/backups
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 512M
+        reservations:
+          cpus: "0.1"
+          memory: 256M
+
+volumes:
+  expense_tracker_uploads:
+    external: true
+    name: expense_tracker_uploads
+  expense_tracker_backups:
+    external: true
+    name: expense_tracker_backups
+
+networks:
+  network_public:
+    name: network_public
+    external: true

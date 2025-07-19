@@ -142,15 +142,15 @@ export function EnhancedExpenseForm({ members, projects, onAddExpense, onBack }:
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto p-2 sm:p-4 max-w-4xl">
-        {/* Header compacto */}
+        {/* Header compacto com título menor */}
         <div className="mb-4">
           <Button variant="ghost" onClick={onBack} className="mb-2 p-2">
             <ArrowLeft className="h-4 w-4 mr-1" />
             Voltar
           </Button>
           <div className="text-center">
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-1 flex items-center justify-center gap-2">
-              <Receipt className="h-6 w-6 sm:h-8 sm:w-8" />
+            <h1 className="text-lg sm:text-xl md:text-2xl font-bold mb-1 flex items-center justify-center gap-2">
+              <Receipt className="h-5 w-5 sm:h-6 sm:w-6" />
               Nova Despesa
             </h1>
             <p className="text-muted-foreground text-xs sm:text-sm">

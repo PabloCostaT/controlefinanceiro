@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  # Aplicação Next.js em modo desenvolvimento
+  app-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - NEXT_TELEMETRY_DISABLED=1
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    restart: unless-stopped
+    networks:
+      - expense-tracker-dev-network
+
+  # Banco de dados PostgreSQL para desenvolvimento
+  postgres-dev:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: expense_tracker_dev
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - expense-tracker-dev-network
+
+volumes:
+  postgres_dev_data:
+
+networks:
+  expense-tracker-dev-network:
+    driver: bridge
