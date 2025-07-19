@@ -8,33 +8,38 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ChevronDown, ChevronUp } from "lucide-react"
 
-interface Column<T> {
-  header: string
-  accessorKey: keyof T
-  cell?: (item: T) => React.ReactNode
+interface Column {
+  key: string
+  label: string
+  render?: (value: any, row: any) => React.ReactNode
   className?: string
 }
 
-interface ResponsiveTableProps<T> {
-  data: T[]
-  columns: Column<T>[]
-  keyField: keyof T
+interface ResponsiveTableProps {
+  data: any[]
+  columns: Column[]
+  keyField: string
+  mobileCardRender?: (row: any, index: number) => React.ReactNode
   emptyMessage?: string
 }
 
-export function ResponsiveTable<T>({
+export function ResponsiveTable({
   data,
   columns,
   keyField,
-  emptyMessage = "Nenhum dado encontrado",
-}: ResponsiveTableProps<T>) {
-  const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({})
+  mobileCardRender,
+  emptyMessage = "Nenhum item encontrado",
+}: ResponsiveTableProps) {
+  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
 
   const toggleRow = (id: string) => {
-    setExpandedRows((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }))
+    const newExpanded = new Set(expandedRows)
+    if (newExpanded.has(id)) {
+      newExpanded.delete(id)
+    } else {
+      newExpanded.add(id)
+    }
+    setExpandedRows(newExpanded)
   }
 
   if (data.length === 0) {
@@ -48,26 +53,23 @@ export function ResponsiveTable<T>({
   return (
     <>
       {/* Desktop Table */}
-      <div className="hidden md:block overflow-x-auto">
+      <div className="hidden md:block">
         <Table>
           <TableHeader>
             <TableRow>
               {columns.map((column) => (
-                <TableHead key={String(column.accessorKey)} className={column.className}>
-                  {column.header}
+                <TableHead key={column.key} className={column.className}>
+                  {column.label}
                 </TableHead>
               ))}
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data.map((item) => (
-              <TableRow key={String(item[keyField])}>
+            {data.map((row, index) => (
+              <TableRow key={row[keyField] || index}>
                 {columns.map((column) => (
-                  <TableCell
-                    key={`${String(item[keyField])}-${String(column.accessorKey)}`}
-                    className={column.className}
-                  >
-                    {column.cell ? column.cell(item) : String(item[column.accessorKey] || "")}
+                  <TableCell key={column.key} className={column.className}>
+                    {column.render ? column.render(row[column.key], row) : row[column.key]}
                   </TableCell>
                 ))}
               </TableRow>
@@ -77,40 +79,43 @@ export function ResponsiveTable<T>({
       </div>
 
       {/* Mobile Cards */}
-      <div className="md:hidden space-y-4">
-        {data.map((item) => {
-          const id = String(item[keyField])
-          const isExpanded = expandedRows[id]
+      <div className="md:hidden space-y-2">
+        {data.map((row, index) => {
+          const rowId = row[keyField] || index.toString()
+          const isExpanded = expandedRows.has(rowId)
 
           return (
-            <Card key={id}>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="font-medium">
-                    {/* Mostrar primeira coluna como título */}
-                    {columns[0].cell ? columns[0].cell(item) : String(item[columns[0].accessorKey] || "")}
-                  </div>
-                  <Button variant="ghost" size="sm" onClick={() => toggleRow(id)}>
-                    {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                  </Button>
-                </div>
-
-                {/* Mostrar segunda coluna sempre visível */}
-                {columns.length > 1 && (
-                  <div className="text-sm text-muted-foreground mt-1">
-                    {columns[1].cell ? columns[1].cell(item) : String(item[columns[1].accessorKey] || "")}
-                  </div>
-                )}
-
-                {/* Mostrar colunas restantes quando expandido */}
-                {isExpanded && (
-                  <div className="mt-4 space-y-2 pt-2 border-t">
-                    {columns.slice(2).map((column) => (
-                      <div key={String(column.accessorKey)} className="grid grid-cols-2 gap-2 text-sm">
-                        <div className="font-medium">{column.header}:</div>
-                        <div>{column.cell ? column.cell(item) : String(item[column.accessorKey] || "")}</div>
+            <Card key={rowId}>
+              <CardContent className="p-3">
+                {mobileCardRender ? (
+                  mobileCardRender(row, index)
+                ) : (
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        {columns.slice(0, 2).map((column) => (
+                          <div key={column.key} className="text-sm">
+                            <span className="font-medium">{column.label}: </span>
+                            {column.render ? column.render(row[column.key], row) : row[column.key]}
+                          </div>
+                        ))}
                       </div>
-                    ))}
+                      {columns.length > 2 && (
+                        <Button variant="ghost" size="sm" onClick={() => toggleRow(rowId)} className="h-6 w-6 p-0">
+                          {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                        </Button>
+                      )}
+                    </div>
+                    {isExpanded && columns.length > 2 && (
+                      <div className="mt-2 pt-2 border-t space-y-1">
+                        {columns.slice(2).map((column) => (
+                          <div key={column.key} className="text-sm">
+                            <span className="font-medium">{column.label}: </span>
+                            {column.render ? column.render(row[column.key], row) : row[column.key]}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
               </CardContent>

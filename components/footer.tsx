@@ -1,75 +1,80 @@
-import Link from "next/link"
-import { Wallet } from "lucide-react"
+"use client"
+
+import { Heart, Mail, Phone } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 export function Footer() {
   const currentYear = new Date().getFullYear()
 
   return (
-    <footer className="border-t bg-background">
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+    <footer className="bg-muted/30 border-t mt-auto">
+      <div className="container mx-auto px-4 py-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* Logo e Descrição */}
-          <div className="col-span-1 md:col-span-2">
-            <div className="flex items-center gap-2 font-semibold text-lg mb-2">
-              <Wallet className="h-6 w-6 text-primary" />
-              <span>FinançaFamília</span>
-            </div>
+          <div className="space-y-3">
+            <h3 className="font-semibold text-lg">Controle Familiar</h3>
             <p className="text-sm text-muted-foreground">
-              Simplifique o controle financeiro da sua família com nossa plataforma intuitiva de gerenciamento de
-              despesas.
+              Gerencie as finanças da sua família de forma simples e organizada.
             </p>
           </div>
 
-          {/* Links Legais */}
+          {/* Links Rápidos */}
           <div className="space-y-3">
-            <h3 className="font-medium">Legal</h3>
-            <ul className="space-y-2 text-sm">
-              <li>
-                <Link href="/termos" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Termos de Uso
-                </Link>
-              </li>
-              <li>
-                <Link href="/privacidade" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Política de Privacidade
-                </Link>
-              </li>
-              <li>
-                <Link href="/cookies" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Política de Cookies
-                </Link>
-              </li>
-            </ul>
+            <h4 className="font-medium">Links Rápidos</h4>
+            <div className="space-y-2">
+              <Button variant="link" className="h-auto p-0 text-sm justify-start">
+                Nova Despesa
+              </Button>
+              <Button variant="link" className="h-auto p-0 text-sm justify-start">
+                Dashboard
+              </Button>
+              <Button variant="link" className="h-auto p-0 text-sm justify-start">
+                Relatórios
+              </Button>
+            </div>
           </div>
 
-          {/* Links de Suporte */}
+          {/* Suporte */}
           <div className="space-y-3">
-            <h3 className="font-medium">Suporte</h3>
-            <ul className="space-y-2 text-sm">
-              <li>
-                <Link href="/ajuda" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Central de Ajuda
-                </Link>
-              </li>
-              <li>
-                <Link href="/contato" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Fale Conosco
-                </Link>
-              </li>
-              <li>
-                <Link href="/status" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Status do Sistema
-                </Link>
-              </li>
-            </ul>
+            <h4 className="font-medium">Suporte</h4>
+            <div className="space-y-2">
+              <Button variant="link" className="h-auto p-0 text-sm justify-start">
+                <Mail className="h-3 w-3 mr-2" />
+                Contato
+              </Button>
+              <Button variant="link" className="h-auto p-0 text-sm justify-start">
+                <Phone className="h-3 w-3 mr-2" />
+                Ajuda
+              </Button>
+            </div>
+          </div>
+
+          {/* Legal */}
+          <div className="space-y-3">
+            <h4 className="font-medium">Legal</h4>
+            <div className="space-y-2">
+              <Button variant="link" className="h-auto p-0 text-sm justify-start">
+                Privacidade
+              </Button>
+              <Button variant="link" className="h-auto p-0 text-sm justify-start">
+                Termos de Uso
+              </Button>
+            </div>
           </div>
         </div>
 
-        <div className="border-t mt-8 pt-6 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-xs text-muted-foreground text-center md:text-left">
-            &copy; {currentYear} FinançaFamília. Todos os direitos reservados.
-          </p>
-          <p className="text-xs text-muted-foreground">Versão 1.0.0 | Atualizado em 19/07/2024</p>
+        {/* Linha de Separação */}
+        <div className="border-t mt-6 pt-6">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="text-sm text-muted-foreground text-center sm:text-left">
+              © {currentYear} Controle Familiar. Todos os direitos reservados.
+            </p>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <span>Feito com</span>
+              <Heart className="h-4 w-4 text-red-500 fill-current" />
+              <span>para famílias</span>
+            </div>
+          </div>
         </div>
       </div>
     </footer>

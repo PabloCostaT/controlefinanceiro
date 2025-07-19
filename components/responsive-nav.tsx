@@ -1,94 +1,87 @@
 "use client"
 
-import type React from "react"
-
 import { useState } from "react"
-import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import { Menu, Home, Receipt, Users, Wallet, Calendar, Settings, LogOut } from "lucide-react"
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Menu, Receipt, TrendingUp, Wallet, Repeat, FolderOpen, Users, Shield } from "lucide-react"
 
-interface NavItem {
-  label: string
-  href: string
-  icon: React.ReactNode
+interface ResponsiveNavProps {
+  currentView: string
+  onViewChange: (view: string) => void
+  isServiceEnabled: (serviceId: string) => boolean
 }
 
-export function ResponsiveNav() {
-  const [open, setOpen] = useState(false)
+export function ResponsiveNav({ currentView, onViewChange, isServiceEnabled }: ResponsiveNavProps) {
+  const [isOpen, setIsOpen] = useState(false)
 
-  const navItems: NavItem[] = [
-    { label: "Início", href: "/", icon: <Home className="h-5 w-5" /> },
-    { label: "Despesas", href: "/despesas", icon: <Receipt className="h-5 w-5" /> },
-    { label: "Membros", href: "/membros", icon: <Users className="h-5 w-5" /> },
-    { label: "Carteira", href: "/carteira", icon: <Wallet className="h-5 w-5" /> },
-    { label: "Despesas Fixas", href: "/despesas-fixas", icon: <Calendar className="h-5 w-5" /> },
-    { label: "Configurações", href: "/configuracoes", icon: <Settings className="h-5 w-5" /> },
-  ]
+  const navItems = [
+    { id: "add-expense", label: "Nova Despesa", icon: Receipt, serviceId: "expense-management" },
+    { id: "main", label: "Dashboard", icon: TrendingUp, serviceId: "financial-dashboard" },
+    { id: "wallet", label: "Carteira", icon: Wallet, serviceId: "wallet-management" },
+    { id: "recurring", label: "Fixas", icon: Repeat, serviceId: "recurring-expenses" },
+    { id: "projects", label: "Projetos", icon: FolderOpen, serviceId: "project-management" },
+    { id: "expenses", label: "Despesas", icon: Receipt, serviceId: "expense-management" },
+    { id: "members", label: "Membros", icon: Users, serviceId: "member-management" },
+    { id: "admin", label: "Admin", icon: Shield, serviceId: "admin" },
+  ].filter((item) => item.serviceId === "admin" || isServiceEnabled(item.serviceId))
+
+  const handleNavClick = (viewId: string) => {
+    onViewChange(viewId)
+    setIsOpen(false)
+  }
 
   return (
-    <>
-      {/* Desktop Navigation */}
-      <div className="hidden md:flex h-16 items-center px-4 border-b bg-background">
-        <div className="flex items-center gap-2 font-semibold text-lg">
-          <Wallet className="h-6 w-6 text-primary" />
-          <span>FinançaFamília</span>
-        </div>
-        <nav className="ml-auto flex items-center gap-4">
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-            >
-              {item.icon}
-              {item.label}
-            </Link>
-          ))}
-          <Button variant="outline" size="sm" className="gap-2 bg-transparent">
-            <LogOut className="h-4 w-4" />
-            Sair
-          </Button>
-        </nav>
-      </div>
+    <nav className="sticky top-0 z-50 bg-background border-b">
+      <div className="container mx-auto px-2 sm:px-4">
+        <div className="flex items-center justify-between h-12 sm:h-14">
+          {/* Logo/Brand */}
+          <div className="flex items-center">
+            <h2 className="text-lg sm:text-xl font-bold">💰 Despesas</h2>
+          </div>
 
-      {/* Mobile Navigation */}
-      <div className="md:hidden flex h-16 items-center justify-between px-4 border-b bg-background">
-        <div className="flex items-center gap-2 font-semibold text-lg">
-          <Wallet className="h-6 w-6 text-primary" />
-          <span>FinançaFamília</span>
-        </div>
-        <Sheet open={open} onOpenChange={setOpen}>
-          <SheetTrigger asChild>
-            <Button variant="outline" size="icon">
-              <Menu className="h-5 w-5" />
-              <span className="sr-only">Menu</span>
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="right">
-            <SheetHeader>
-              <SheetTitle>Menu</SheetTitle>
-            </SheetHeader>
-            <nav className="flex flex-col gap-4 mt-8">
-              {navItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="flex items-center gap-3 py-2 text-base font-medium hover:text-primary transition-colors"
-                  onClick={() => setOpen(false)}
-                >
-                  {item.icon}
-                  {item.label}
-                </Link>
-              ))}
-              <Button className="mt-4 gap-2">
-                <LogOut className="h-4 w-4" />
-                Sair
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center space-x-1">
+            {navItems.map((item) => (
+              <Button
+                key={item.id}
+                variant={currentView === item.id ? "default" : "ghost"}
+                size="sm"
+                onClick={() => handleNavClick(item.id)}
+                className="flex items-center gap-2 h-8"
+              >
+                <item.icon className="h-4 w-4" />
+                <span className="text-xs">{item.label}</span>
               </Button>
-            </nav>
-          </SheetContent>
-        </Sheet>
+            ))}
+          </div>
+
+          {/* Mobile Navigation */}
+          <div className="md:hidden">
+            <Sheet open={isOpen} onOpenChange={setIsOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  <Menu className="h-4 w-4" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-64">
+                <div className="flex flex-col space-y-2 mt-6">
+                  {navItems.map((item) => (
+                    <Button
+                      key={item.id}
+                      variant={currentView === item.id ? "default" : "ghost"}
+                      onClick={() => handleNavClick(item.id)}
+                      className="justify-start gap-3 h-10"
+                    >
+                      <item.icon className="h-4 w-4" />
+                      {item.label}
+                    </Button>
+                  ))}
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
+        </div>
       </div>
-    </>
+    </nav>
   )
 }

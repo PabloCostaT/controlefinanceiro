@@ -10,7 +10,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
 import { ArrowLeft, Receipt, Calculator, Users, Calendar, Tag, DollarSign } from "lucide-react"
 import type { FamilyMember, Project } from "../types/expense"
 
@@ -142,35 +141,39 @@ export function EnhancedExpenseForm({ members, projects, onAddExpense, onBack }:
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto p-4 max-w-4xl">
-        {/* Header */}
-        <div className="mb-6">
-          <Button variant="ghost" onClick={onBack} className="mb-4">
-            <ArrowLeft className="h-4 w-4 mr-2" />
+      <div className="container mx-auto p-2 sm:p-4 max-w-4xl">
+        {/* Header compacto */}
+        <div className="mb-4">
+          <Button variant="ghost" onClick={onBack} className="mb-2 p-2">
+            <ArrowLeft className="h-4 w-4 mr-1" />
             Voltar
           </Button>
           <div className="text-center">
-            <h1 className="text-3xl font-bold mb-2 flex items-center justify-center gap-2">
-              <Receipt className="h-8 w-8" />
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-1 flex items-center justify-center gap-2">
+              <Receipt className="h-6 w-6 sm:h-8 sm:w-8" />
               Nova Despesa
             </h1>
-            <p className="text-muted-foreground">Adicione uma nova despesa e divida entre os membros da família</p>
+            <p className="text-muted-foreground text-xs sm:text-sm">
+              Adicione uma nova despesa e divida entre os membros da família
+            </p>
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Basic Information */}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Informações Básicas - Layout mais compacto */}
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Tag className="h-5 w-5" />
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <Tag className="h-4 w-4" />
                 Informações Básicas
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <CardContent className="space-y-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div className="md:col-span-2">
-                  <Label htmlFor="description">Descrição da Despesa *</Label>
+                  <Label htmlFor="description" className="text-sm">
+                    Descrição da Despesa *
+                  </Label>
                   <Input
                     id="description"
                     value={description}
@@ -178,16 +181,18 @@ export function EnhancedExpenseForm({ members, projects, onAddExpense, onBack }:
                       setDescription(e.target.value)
                       if (errors.description) setErrors((prev) => ({ ...prev, description: "" }))
                     }}
-                    placeholder="Ex: Supermercado, Conta de luz, Jantar no restaurante..."
-                    className={errors.description ? "border-red-500" : ""}
+                    placeholder="Ex: Supermercado, Conta de luz..."
+                    className={`h-9 ${errors.description ? "border-red-500" : ""}`}
                   />
-                  {errors.description && <p className="text-sm text-red-500 mt-1">{errors.description}</p>}
+                  {errors.description && <p className="text-xs text-red-500 mt-1">{errors.description}</p>}
                 </div>
 
                 <div>
-                  <Label htmlFor="amount">Valor (R$) *</Label>
+                  <Label htmlFor="amount" className="text-sm">
+                    Valor (R$) *
+                  </Label>
                   <div className="relative">
-                    <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <DollarSign className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="amount"
                       type="number"
@@ -198,49 +203,40 @@ export function EnhancedExpenseForm({ members, projects, onAddExpense, onBack }:
                         if (errors.amount) setErrors((prev) => ({ ...prev, amount: "" }))
                       }}
                       placeholder="0,00"
-                      className={`pl-10 ${errors.amount ? "border-red-500" : ""}`}
+                      className={`pl-8 h-9 ${errors.amount ? "border-red-500" : ""}`}
                     />
                   </div>
-                  {errors.amount && <p className="text-sm text-red-500 mt-1">{errors.amount}</p>}
+                  {errors.amount && <p className="text-xs text-red-500 mt-1">{errors.amount}</p>}
                 </div>
 
                 <div>
-                  <Label htmlFor="date">Data *</Label>
+                  <Label htmlFor="date" className="text-sm">
+                    Data *
+                  </Label>
                   <div className="relative">
-                    <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Calendar className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="date"
                       type="date"
                       value={date}
                       onChange={(e) => setDate(e.target.value)}
-                      className="pl-10"
+                      className="pl-8 h-9"
                     />
                   </div>
                 </div>
               </div>
-
-              <div>
-                <Label htmlFor="notes">Observações (opcional)</Label>
-                <Textarea
-                  id="notes"
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Adicione detalhes adicionais sobre esta despesa..."
-                  rows={3}
-                />
-              </div>
             </CardContent>
           </Card>
 
-          {/* Payment and Category */}
+          {/* Pagamento e Categoria - Layout compacto */}
           <Card>
-            <CardHeader>
-              <CardTitle>Pagamento e Categoria</CardTitle>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base sm:text-lg">Pagamento e Categoria</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <CardContent className="space-y-3">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div>
-                  <Label>Quem pagou? *</Label>
+                  <Label className="text-sm">Quem pagou? *</Label>
                   <Select
                     value={paidBy}
                     onValueChange={(value) => {
@@ -248,14 +244,14 @@ export function EnhancedExpenseForm({ members, projects, onAddExpense, onBack }:
                       if (errors.paidBy) setErrors((prev) => ({ ...prev, paidBy: "" }))
                     }}
                   >
-                    <SelectTrigger className={errors.paidBy ? "border-red-500" : ""}>
-                      <SelectValue placeholder="Selecione quem pagou" />
+                    <SelectTrigger className={`h-9 ${errors.paidBy ? "border-red-500" : ""}`}>
+                      <SelectValue placeholder="Selecione" />
                     </SelectTrigger>
                     <SelectContent>
                       {members.map((member) => (
                         <SelectItem key={member.id} value={member.id}>
                           <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium">
+                            <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium">
                               {member.name.charAt(0).toUpperCase()}
                             </div>
                             {member.name}
@@ -264,11 +260,11 @@ export function EnhancedExpenseForm({ members, projects, onAddExpense, onBack }:
                       ))}
                     </SelectContent>
                   </Select>
-                  {errors.paidBy && <p className="text-sm text-red-500 mt-1">{errors.paidBy}</p>}
+                  {errors.paidBy && <p className="text-xs text-red-500 mt-1">{errors.paidBy}</p>}
                 </div>
 
                 <div>
-                  <Label>Categoria *</Label>
+                  <Label className="text-sm">Categoria *</Label>
                   <Select
                     value={category}
                     onValueChange={(value) => {
@@ -276,8 +272,8 @@ export function EnhancedExpenseForm({ members, projects, onAddExpense, onBack }:
                       if (errors.category) setErrors((prev) => ({ ...prev, category: "" }))
                     }}
                   >
-                    <SelectTrigger className={errors.category ? "border-red-500" : ""}>
-                      <SelectValue placeholder="Selecione a categoria" />
+                    <SelectTrigger className={`h-9 ${errors.category ? "border-red-500" : ""}`}>
+                      <SelectValue placeholder="Categoria" />
                     </SelectTrigger>
                     <SelectContent>
                       {categories.map((cat) => (
@@ -290,13 +286,14 @@ export function EnhancedExpenseForm({ members, projects, onAddExpense, onBack }:
                       ))}
                     </SelectContent>
                   </Select>
-                  {errors.category && <p className="text-sm text-red-500 mt-1">{errors.category}</p>}
+                  {errors.category && <p className="text-xs text-red-500 mt-1">{errors.category}</p>}
                 </div>
+
                 <div>
-                  <Label>Projeto (opcional)</Label>
+                  <Label className="text-sm">Projeto (opcional)</Label>
                   <Select value={projectId} onValueChange={(value) => setProjectId(value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione um projeto" />
+                    <SelectTrigger className="h-9">
+                      <SelectValue placeholder="Projeto" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="none">Sem projeto</SelectItem>
@@ -317,28 +314,40 @@ export function EnhancedExpenseForm({ members, projects, onAddExpense, onBack }:
             </CardContent>
           </Card>
 
-          {/* Split Between Members */}
+          {/* Dividir Entre Membros - Layout compacto */}
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5" />
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <Users className="h-4 w-4" />
                 Dividir Entre
               </CardTitle>
               <div className="flex gap-2">
-                <Button type="button" variant="outline" size="sm" onClick={selectAllMembers}>
-                  Selecionar Todos
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={selectAllMembers}
+                  className="h-7 text-xs bg-transparent"
+                >
+                  Todos
                 </Button>
-                <Button type="button" variant="outline" size="sm" onClick={clearAllMembers}>
-                  Limpar Seleção
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={clearAllMembers}
+                  className="h-7 text-xs bg-transparent"
+                >
+                  Limpar
                 </Button>
               </div>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <CardContent className="space-y-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {members.map((member) => (
                   <div
                     key={member.id}
-                    className={`flex items-center space-x-3 p-3 border rounded-lg transition-colors ${
+                    className={`flex items-center space-x-2 p-2 border rounded-lg transition-colors ${
                       splitBetween.includes(member.id) ? "bg-primary/5 border-primary/20" : "hover:bg-muted/50"
                     }`}
                   >
@@ -348,68 +357,71 @@ export function EnhancedExpenseForm({ members, projects, onAddExpense, onBack }:
                       onCheckedChange={(checked) => handleMemberToggle(member.id, checked as boolean)}
                     />
                     <div className="flex-1">
-                      <Label htmlFor={`member-${member.id}`} className="font-medium cursor-pointer">
+                      <Label htmlFor={`member-${member.id}`} className="text-sm font-medium cursor-pointer">
                         {member.name}
                       </Label>
-                      {member.email && <p className="text-xs text-muted-foreground">{member.email}</p>}
                     </div>
                     {splitBetween.includes(member.id) && (
-                      <Badge variant="secondary" className="text-xs">
-                        Incluído
+                      <Badge variant="secondary" className="text-xs px-2 py-0">
+                        ✓
                       </Badge>
                     )}
                   </div>
                 ))}
               </div>
-              {errors.splitBetween && <p className="text-sm text-red-500">{errors.splitBetween}</p>}
+              {errors.splitBetween && <p className="text-xs text-red-500">{errors.splitBetween}</p>}
             </CardContent>
           </Card>
 
-          {/* Calculation Summary */}
+          {/* Observações - Compacto */}
+          <Card>
+            <CardContent className="pt-4">
+              <Label htmlFor="notes" className="text-sm">
+                Observações (opcional)
+              </Label>
+              <Textarea
+                id="notes"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Detalhes adicionais..."
+                rows={2}
+                className="mt-1"
+              />
+            </CardContent>
+          </Card>
+
+          {/* Resumo do Rateio - Compacto */}
           {splitBetween.length > 0 && amount && (
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Calculator className="h-5 w-5" />
-                  Resumo do Rateio
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                  <Calculator className="h-4 w-4" />
+                  Resumo
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center text-lg font-semibold">
-                    <span>Valor Total:</span>
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center font-semibold">
+                    <span className="text-sm">Total:</span>
                     <span>{formatCurrency(Number.parseFloat(amount))}</span>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span>Dividido entre {splitBetween.length} pessoa(s):</span>
-                    <span className="font-medium">{formatCurrency(amountPerPerson)} por pessoa</span>
-                  </div>
-                  <Separator />
-                  <div className="space-y-2">
-                    <p className="text-sm font-medium">Divisão:</p>
-                    {splitBetween.map((memberId) => {
-                      const member = members.find((m) => m.id === memberId)
-                      return (
-                        <div key={memberId} className="flex justify-between text-sm">
-                          <span>{member?.name}</span>
-                          <span>{formatCurrency(amountPerPerson)}</span>
-                        </div>
-                      )
-                    })}
+                  <div className="flex justify-between items-center text-sm">
+                    <span>Por pessoa ({splitBetween.length}):</span>
+                    <span className="font-medium">{formatCurrency(amountPerPerson)}</span>
                   </div>
                 </div>
               </CardContent>
             </Card>
           )}
 
-          {/* Submit Button */}
-          <div className="flex gap-4">
-            <Button type="button" variant="outline" onClick={onBack} className="flex-1 bg-transparent">
+          {/* Botões de Ação - Compactos */}
+          <div className="flex gap-3 pt-2">
+            <Button type="button" variant="outline" onClick={onBack} className="flex-1 h-10 bg-transparent">
               Cancelar
             </Button>
-            <Button type="submit" className="flex-1">
+            <Button type="submit" className="flex-1 h-10">
               <Receipt className="h-4 w-4 mr-2" />
-              Adicionar Despesa
+              Adicionar
             </Button>
           </div>
         </form>
