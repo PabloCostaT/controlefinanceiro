@@ -11,240 +11,243 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Card, CardContent } from "@/components/ui/card"
-import { FileText, Shield, Users, AlertTriangle, ExternalLink } from "lucide-react"
+import { FileText, Shield, Eye, Users, ExternalLink, CheckCircle, AlertCircle } from "lucide-react"
 import Link from "next/link"
 
 interface TermsAcceptanceProps {
-  onAccept: (accepted: boolean) => void
+  onAcceptanceChange: (accepted: boolean) => void
+  accepted: boolean
   required?: boolean
-  showFullTerms?: boolean
 }
 
-export function TermsAcceptance({ onAccept, required = true, showFullTerms = false }: TermsAcceptanceProps) {
-  const [accepted, setAccepted] = useState(false)
-  const [dialogOpen, setDialogOpen] = useState(false)
-
-  const handleAcceptanceChange = (checked: boolean) => {
-    setAccepted(checked)
-    onAccept(checked)
-  }
+export function TermsAcceptance({ onAcceptanceChange, accepted, required = true }: TermsAcceptanceProps) {
+  const [showTermsModal, setShowTermsModal] = useState(false)
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false)
 
   const termsHighlights = [
     {
-      icon: Users,
-      title: "Uso Familiar",
-      description: "Plataforma destinada ao uso pessoal e familiar para gestão de despesas",
+      icon: <Users className="h-4 w-4" />,
+      title: "Controle Familiar",
+      description: "Gerencie despesas e divida custos entre membros da família",
     },
     {
-      icon: Shield,
-      title: "Proteção de Dados",
-      description: "Seus dados são protegidos conforme a LGPD e nunca compartilhados sem consentimento",
+      icon: <Shield className="h-4 w-4" />,
+      title: "Segurança",
+      description: "Seus dados financeiros são protegidos com criptografia",
     },
     {
-      icon: FileText,
-      title: "Gratuito",
-      description: "Serviço gratuito com funcionalidades completas para gestão financeira familiar",
+      icon: <Eye className="h-4 w-4" />,
+      title: "Transparência",
+      description: "Relatórios claros sobre gastos e divisões",
+    },
+    {
+      icon: <FileText className="h-4 w-4" />,
+      title: "Responsabilidades",
+      description: "Uso adequado da plataforma e veracidade dos dados",
+    },
+  ]
+
+  const privacyHighlights = [
+    {
+      icon: <Shield className="h-4 w-4" />,
+      title: "Proteção LGPD",
+      description: "Conformidade total com a Lei Geral de Proteção de Dados",
+    },
+    {
+      icon: <Eye className="h-4 w-4" />,
+      title: "Seus Direitos",
+      description: "Acesso, correção, exclusão e portabilidade dos seus dados",
+    },
+    {
+      icon: <Users className="h-4 w-4" />,
+      title: "Não Vendemos",
+      description: "Seus dados nunca são vendidos para terceiros",
+    },
+    {
+      icon: <FileText className="h-4 w-4" />,
+      title: "Transparência",
+      description: "Informações claras sobre coleta e uso de dados",
     },
   ]
 
   return (
     <div className="space-y-4">
-      {/* Resumo dos Termos */}
-      {showFullTerms && (
+      {/* Resumo dos Documentos */}
+      <div className="grid md:grid-cols-2 gap-4">
         <Card className="border-blue-200 bg-blue-50">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <FileText className="h-5 w-5 text-blue-600" />
-              <h3 className="font-semibold text-blue-900">Principais Pontos dos Termos</h3>
-            </div>
-            <div className="grid gap-3">
-              {termsHighlights.map((item, index) => (
-                <div key={index} className="flex items-start gap-3">
-                  <item.icon className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <p className="font-medium text-blue-900 text-sm">{item.title}</p>
-                    <p className="text-blue-700 text-xs">{item.description}</p>
-                  </div>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm flex items-center text-blue-800">
+              <FileText className="mr-2 h-4 w-4" />
+              Termos de Uso
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {termsHighlights.map((item, index) => (
+              <div key={index} className="flex items-start space-x-2">
+                <div className="text-blue-600 mt-0.5">{item.icon}</div>
+                <div>
+                  <p className="text-xs font-medium text-blue-800">{item.title}</p>
+                  <p className="text-xs text-blue-600">{item.description}</p>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </CardContent>
         </Card>
-      )}
 
-      {/* Checkbox de Aceitação */}
-      <div className="flex items-start space-x-3">
-        <Checkbox id="terms-acceptance" checked={accepted} onCheckedChange={handleAcceptanceChange} className="mt-1" />
-        <div className="space-y-2">
-          <label
-            htmlFor="terms-acceptance"
-            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-          >
-            {required && <span className="text-red-500">* </span>}
-            Li e concordo com os{" "}
-            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="link" className="p-0 h-auto text-blue-600 underline">
-                  Termos de Uso
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-4xl max-h-[80vh]">
-                <DialogHeader>
-                  <DialogTitle className="flex items-center gap-2">
-                    <FileText className="h-5 w-5" />
-                    Termos de Uso
-                  </DialogTitle>
-                  <DialogDescription>
-                    Leia atentamente os termos e condições de uso da nossa plataforma
-                  </DialogDescription>
-                </DialogHeader>
-                <ScrollArea className="h-[60vh] pr-4">
-                  <div className="space-y-6">
-                    {/* Resumo Executivo */}
-                    <Card className="border-blue-200 bg-blue-50">
-                      <CardContent className="p-4">
-                        <div className="flex items-center gap-2 mb-3">
-                          <AlertTriangle className="h-5 w-5 text-blue-600" />
-                          <h3 className="font-semibold text-blue-900">Resumo Executivo</h3>
-                        </div>
-                        <p className="text-blue-800 text-sm mb-3">
-                          Este documento estabelece os termos para uso da nossa plataforma de gestão de despesas
-                          familiares.
-                        </p>
-                        <div className="grid gap-2">
-                          {termsHighlights.map((item, index) => (
-                            <div key={index} className="flex items-center gap-2 text-sm">
-                              <item.icon className="h-4 w-4 text-blue-600" />
-                              <span className="text-blue-800">
-                                {item.title}: {item.description}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    {/* Seções Principais */}
-                    <div className="space-y-4">
-                      <div>
-                        <h3 className="font-semibold text-lg mb-2">1. Aceitação dos Termos</h3>
-                        <p className="text-sm text-slate-600 mb-2">
-                          Ao usar nossa plataforma, você concorda com estes termos e declara que:
-                        </p>
-                        <ul className="list-disc list-inside text-sm text-slate-600 space-y-1 ml-4">
-                          <li>Tem pelo menos 18 anos ou autorização dos responsáveis</li>
-                          <li>Fornecerá informações verdadeiras e atualizadas</li>
-                          <li>Usará a plataforma de forma legal e responsável</li>
-                        </ul>
-                      </div>
-
-                      <div>
-                        <h3 className="font-semibold text-lg mb-2">2. Descrição do Serviço</h3>
-                        <p className="text-sm text-slate-600 mb-2">
-                          Nossa plataforma oferece ferramentas gratuitas para:
-                        </p>
-                        <ul className="list-disc list-inside text-sm text-slate-600 space-y-1 ml-4">
-                          <li>Registro e categorização de despesas</li>
-                          <li>Gestão de membros da família</li>
-                          <li>Controle de carteiras e contas</li>
-                          <li>Relatórios e análises financeiras</li>
-                          <li>Despesas recorrentes e projetos</li>
-                        </ul>
-                      </div>
-
-                      <div>
-                        <h3 className="font-semibold text-lg mb-2">3. Privacidade e Proteção de Dados</h3>
-                        <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-2">
-                          <div className="flex items-center gap-2 mb-2">
-                            <Shield className="h-4 w-4 text-green-600" />
-                            <span className="font-medium text-green-800">Seus dados estão protegidos</span>
-                          </div>
-                          <ul className="list-disc list-inside text-sm text-green-700 space-y-1 ml-4">
-                            <li>Coletamos apenas dados necessários para o serviço</li>
-                            <li>Nunca vendemos ou compartilhamos com terceiros</li>
-                            <li>Você pode acessar, corrigir ou excluir seus dados</li>
-                            <li>Cumprimos integralmente a LGPD</li>
-                          </ul>
-                        </div>
-                      </div>
-
-                      <div>
-                        <h3 className="font-semibold text-lg mb-2">4. Responsabilidades</h3>
-                        <div className="grid md:grid-cols-2 gap-4">
-                          <div>
-                            <h4 className="font-medium text-green-700 mb-1">✓ Suas Responsabilidades:</h4>
-                            <ul className="list-disc list-inside text-sm text-slate-600 space-y-1 ml-4">
-                              <li>Manter credenciais seguras</li>
-                              <li>Usar apenas para fins legítimos</li>
-                              <li>Manter informações atualizadas</li>
-                            </ul>
-                          </div>
-                          <div>
-                            <h4 className="font-medium text-blue-700 mb-1">✓ Nossas Responsabilidades:</h4>
-                            <ul className="list-disc list-inside text-sm text-slate-600 space-y-1 ml-4">
-                              <li>Manter a plataforma funcionando</li>
-                              <li>Proteger seus dados</li>
-                              <li>Fornecer suporte quando necessário</li>
-                            </ul>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div>
-                        <h3 className="font-semibold text-lg mb-2">5. Modificações</h3>
-                        <p className="text-sm text-slate-600">
-                          Podemos modificar estes termos com aviso prévio de 30 dias. Você será notificado por email e
-                          através da plataforma.
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="bg-slate-50 rounded-lg p-4 text-center">
-                      <p className="text-sm text-slate-600 mb-2">Para ver os termos completos e detalhados:</p>
-                      <Link href="/termos" target="_blank">
-                        <Button variant="outline" size="sm">
-                          <ExternalLink className="h-4 w-4 mr-2" />
-                          Ver Termos Completos
-                        </Button>
-                      </Link>
-                    </div>
-                  </div>
-                </ScrollArea>
-                <div className="flex justify-end gap-2 pt-4 border-t">
-                  <Button variant="outline" onClick={() => setDialogOpen(false)}>
-                    Fechar
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      handleAcceptanceChange(true)
-                      setDialogOpen(false)
-                    }}
-                    disabled={accepted}
-                  >
-                    {accepted ? "Já Aceito" : "Aceitar Termos"}
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>{" "}
-            e{" "}
-            <Link href="/privacidade" className="text-blue-600 underline">
+        <Card className="border-green-200 bg-green-50">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm flex items-center text-green-800">
+              <Shield className="mr-2 h-4 w-4" />
               Política de Privacidade
-            </Link>
-          </label>
-
-          {required && !accepted && (
-            <p className="text-xs text-red-500">É necessário aceitar os termos para continuar</p>
-          )}
-        </div>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {privacyHighlights.map((item, index) => (
+              <div key={index} className="flex items-start space-x-2">
+                <div className="text-green-600 mt-0.5">{item.icon}</div>
+                <div>
+                  <p className="text-xs font-medium text-green-800">{item.title}</p>
+                  <p className="text-xs text-green-600">{item.description}</p>
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Link para termos completos */}
-      <div className="text-xs text-slate-500">
-        <Link href="/termos" target="_blank" className="flex items-center gap-1 hover:text-slate-700">
-          <ExternalLink className="h-3 w-3" />
-          Ver termos completos em nova aba
+      {/* Checkbox de Aceitação */}
+      <Card
+        className={`border-2 ${accepted ? "border-green-200 bg-green-50" : required ? "border-red-200 bg-red-50" : "border-gray-200"}`}
+      >
+        <CardContent className="pt-6">
+          <div className="flex items-start space-x-3">
+            <Checkbox id="terms-acceptance" checked={accepted} onCheckedChange={onAcceptanceChange} className="mt-1" />
+            <div className="space-y-2 flex-1">
+              <label
+                htmlFor="terms-acceptance"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+              >
+                Aceito os documentos legais {required && <span className="text-red-500">*</span>}
+              </label>
+              <p className="text-xs text-muted-foreground">
+                Li e concordo com os{" "}
+                <Dialog open={showTermsModal} onOpenChange={setShowTermsModal}>
+                  <DialogTrigger asChild>
+                    <Button variant="link" className="h-auto p-0 text-xs text-blue-600 hover:text-blue-800">
+                      Termos de Uso
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-4xl max-h-[80vh]">
+                    <DialogHeader>
+                      <DialogTitle className="flex items-center">
+                        <FileText className="mr-2 h-5 w-5" />
+                        Resumo dos Termos de Uso
+                      </DialogTitle>
+                      <DialogDescription>Principais pontos dos nossos termos de uso</DialogDescription>
+                    </DialogHeader>
+                    <ScrollArea className="h-[60vh] pr-4">
+                      <div className="space-y-4">
+                        {termsHighlights.map((item, index) => (
+                          <Card key={index}>
+                            <CardHeader className="pb-2">
+                              <CardTitle className="text-sm flex items-center">
+                                {item.icon}
+                                <span className="ml-2">{item.title}</span>
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-sm text-muted-foreground">{item.description}</p>
+                            </CardContent>
+                          </Card>
+                        ))}
+                        <div className="pt-4">
+                          <Link href="/termos" target="_blank">
+                            <Button variant="outline" className="w-full bg-transparent">
+                              <ExternalLink className="mr-2 h-4 w-4" />
+                              Ver Termos Completos
+                            </Button>
+                          </Link>
+                        </div>
+                      </div>
+                    </ScrollArea>
+                  </DialogContent>
+                </Dialog>{" "}
+                e a{" "}
+                <Dialog open={showPrivacyModal} onOpenChange={setShowPrivacyModal}>
+                  <DialogTrigger asChild>
+                    <Button variant="link" className="h-auto p-0 text-xs text-green-600 hover:text-green-800">
+                      Política de Privacidade
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-4xl max-h-[80vh]">
+                    <DialogHeader>
+                      <DialogTitle className="flex items-center">
+                        <Shield className="mr-2 h-5 w-5" />
+                        Resumo da Política de Privacidade
+                      </DialogTitle>
+                      <DialogDescription>Como protegemos e tratamos seus dados pessoais</DialogDescription>
+                    </DialogHeader>
+                    <ScrollArea className="h-[60vh] pr-4">
+                      <div className="space-y-4">
+                        {privacyHighlights.map((item, index) => (
+                          <Card key={index}>
+                            <CardHeader className="pb-2">
+                              <CardTitle className="text-sm flex items-center">
+                                {item.icon}
+                                <span className="ml-2">{item.title}</span>
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-sm text-muted-foreground">{item.description}</p>
+                            </CardContent>
+                          </Card>
+                        ))}
+                        <div className="pt-4">
+                          <Link href="/privacidade" target="_blank">
+                            <Button variant="outline" className="w-full bg-transparent">
+                              <ExternalLink className="mr-2 h-4 w-4" />
+                              Ver Política Completa
+                            </Button>
+                          </Link>
+                        </div>
+                      </div>
+                    </ScrollArea>
+                  </DialogContent>
+                </Dialog>
+              </p>
+
+              {accepted && (
+                <Alert className="border-green-200 bg-green-50">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <AlertDescription className="text-green-700">Documentos aceitos com sucesso!</AlertDescription>
+                </Alert>
+              )}
+
+              {required && !accepted && (
+                <Alert className="border-red-200 bg-red-50">
+                  <AlertCircle className="h-4 w-4 text-red-600" />
+                  <AlertDescription className="text-red-700">
+                    É necessário aceitar os termos para continuar.
+                  </AlertDescription>
+                </Alert>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Links Diretos */}
+      <div className="flex justify-center space-x-4 text-xs">
+        <Link href="/termos" target="_blank" className="text-blue-600 hover:text-blue-800 flex items-center">
+          <FileText className="mr-1 h-3 w-3" />
+          Termos Completos
+        </Link>
+        <Link href="/privacidade" target="_blank" className="text-green-600 hover:text-green-800 flex items-center">
+          <Shield className="mr-1 h-3 w-3" />
+          Privacidade Completa
         </Link>
       </div>
     </div>
