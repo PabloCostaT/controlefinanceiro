@@ -1,62 +1,32 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-// Permite saída standalone para Docker/Serverless
-output: 'standalone',
+  output: 'standalone',
 
-// Manter regras de lint e TS como estavam
-eslint: {
-  ignoreDuringBuilds: true,
-},
-typescript: {
-  ignoreBuildErrors: true,
-},
+  serverExternalPackages: [],
 
-// Pacotes externos permitidos nos Server Components
-serverExternalPackages: [],
+  images: { unoptimized: true },
 
-// Otimização de imagens
-images: {
-  unoptimized: true,
-},
+  eslint: { ignoreDuringBuilds: true },
+  typescript: { ignoreBuildErrors: true },
 
-// Security headers
-async headers() {
-  return [
-    {
-      source: '/(.*)',
-      headers: [
-        {
-          key: 'X-Frame-Options',
-          value: 'DENY',
-        },
-        {
-          key: 'X-Content-Type-Options',
-          value: 'nosniff',
-        },
-        {
-          key: 'Referrer-Policy',
-          value: 'origin-when-cross-origin',
-        },
-      ],
-    },
-  ]
-},
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          { key: 'X-Frame-Options', value: 'DENY' },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Referrer-Policy', value: 'origin-when-cross-origin' },
+        ],
+      },
+    ]
+  },
 
-// Redirects
-async redirects() {
-  return [
-    {
-      source: '/home',
-      destination: '/',
-      permanent: true,
-    },
-  ]
-},
+  async redirects() {
+    return [{ source: '/home', destination: '/', permanent: true }]
+  },
 
-// Environment variables
-env: {
-  CUSTOM_KEY: process.env.CUSTOM_KEY,
-},
+  env: { CUSTOM_KEY: process.env.CUSTOM_KEY },
 }
 
 export default nextConfig

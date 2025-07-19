@@ -28,6 +28,7 @@ interface EnhancedExpenseFormProps {
 
 export function EnhancedExpenseForm({ members, projects, onAddExpense, onBack }: EnhancedExpenseFormProps) {
   const { theme, setTheme } = useTheme()
+  const [loading, setLoading] = useState(false)
   const [description, setDescription] = useState("")
   const [amount, setAmount] = useState("")
   const [category, setCategory] = useState("")
@@ -51,11 +52,13 @@ export function EnhancedExpenseForm({ members, projects, onAddExpense, onBack }:
 
   const paymentMethods = ["Dinheiro", "Cartão de Débito", "Cartão de Crédito", "PIX", "Transferência", "Outros"]
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setLoading(true)
 
     if (!description || !amount || !category || selectedMembers.length === 0) {
       alert("Por favor, preencha todos os campos obrigatórios")
+      setLoading(false)
       return
     }
 
@@ -84,6 +87,7 @@ export function EnhancedExpenseForm({ members, projects, onAddExpense, onBack }:
     setSelectedProject("")
     setNotes("")
     setPaymentMethod("")
+    setLoading(false)
   }
 
   const toggleMemberSelection = (memberId: string) => {
@@ -137,6 +141,7 @@ export function EnhancedExpenseForm({ members, projects, onAddExpense, onBack }:
                     placeholder="Ex: Compras no supermercado"
                     className="h-9"
                     required
+                    aria-label="Descrição da despesa"
                   />
                 </div>
                 <div className="space-y-1">
@@ -152,6 +157,7 @@ export function EnhancedExpenseForm({ members, projects, onAddExpense, onBack }:
                     placeholder="0,00"
                     className="h-9"
                     required
+                    aria-label="Valor da despesa"
                   />
                 </div>
               </div>
@@ -319,8 +325,8 @@ export function EnhancedExpenseForm({ members, projects, onAddExpense, onBack }:
             <Button type="button" variant="outline" onClick={onBack} className="flex-1 bg-transparent">
               Voltar
             </Button>
-            <Button type="submit" className="flex-1 bg-primary hover:bg-primary/90">
-              Adicionar Despesa
+            <Button type="submit" className="flex-1 bg-primary hover:bg-primary/90" disabled={loading}>
+              {loading ? "Salvando..." : "Adicionar Despesa"}
             </Button>
           </div>
         </form>
