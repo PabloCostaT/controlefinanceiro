@@ -16,6 +16,7 @@ import { WalletManagement } from "../components/wallet-management"
 import { FinancialDashboard } from "../components/financial-dashboard"
 import { AdminPanel } from "../components/admin-panel"
 import { Footer } from "../components/footer"
+import { ResponsiveNav } from "@/components/responsive-nav"
 
 export default function ExpenseTracker() {
   const {
@@ -51,6 +52,7 @@ export default function ExpenseTracker() {
   if (currentView === "add-expense") {
     return (
       <div className="min-h-screen bg-background flex flex-col">
+        <ResponsiveNav />
         <div className="flex-1">
           <EnhancedExpenseForm
             members={members}
@@ -70,6 +72,7 @@ export default function ExpenseTracker() {
   if (currentView === "admin") {
     return (
       <div className="min-h-screen bg-background flex flex-col">
+        <ResponsiveNav />
         <div className="flex-1">
           <AdminPanel onClose={() => setCurrentView("main")} />
         </div>
@@ -90,6 +93,7 @@ export default function ExpenseTracker() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      <ResponsiveNav />
       <div className="flex-1">
         <div className="container mx-auto p-4">
           <div className="mb-8 text-center">

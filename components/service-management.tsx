@@ -179,7 +179,7 @@ export function ServiceManagement() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h3 className="text-lg font-semibold">Gerenciamento de Serviços</h3>
           <p className="text-sm text-muted-foreground">Controle as funcionalidades disponíveis no sistema</p>
@@ -187,13 +187,18 @@ export function ServiceManagement() {
         <div className="flex items-center gap-2">
           {selectedServices.length > 0 && (
             <>
-              <Button variant="outline" size="sm" onClick={() => handleBulkToggle(true)}>
-                <ToggleRight className="h-4 w-4 mr-1" />
-                Habilitar ({selectedServices.length})
+              <Button variant="outline" size="sm" onClick={() => handleBulkToggle(true)} className="text-xs sm:text-sm">
+                <ToggleRight className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                <span className="hidden xs:inline">Habilitar</span> ({selectedServices.length})
               </Button>
-              <Button variant="outline" size="sm" onClick={() => handleBulkToggle(false)}>
-                <ToggleLeft className="h-4 w-4 mr-1" />
-                Desabilitar ({selectedServices.length})
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleBulkToggle(false)}
+                className="text-xs sm:text-sm"
+              >
+                <ToggleLeft className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                <span className="hidden xs:inline">Desabilitar</span> ({selectedServices.length})
               </Button>
             </>
           )}
@@ -201,58 +206,58 @@ export function ServiceManagement() {
       </div>
 
       {/* Estatísticas */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 sm:gap-4">
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-3 sm:p-4">
             <div className="flex items-center gap-2">
               <Activity className="h-4 w-4 text-green-500" />
               <div>
-                <p className="text-sm font-medium">Serviços Ativos</p>
-                <p className="text-2xl font-bold text-green-600">{enabledCount}</p>
+                <p className="text-xs sm:text-sm font-medium">Serviços Ativos</p>
+                <p className="text-lg sm:text-2xl font-bold text-green-600">{enabledCount}</p>
               </div>
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-3 sm:p-4">
             <div className="flex items-center gap-2">
               <XCircle className="h-4 w-4 text-red-500" />
               <div>
-                <p className="text-sm font-medium">Desabilitados</p>
-                <p className="text-2xl font-bold text-red-600">{disabledCount}</p>
+                <p className="text-xs sm:text-sm font-medium">Desabilitados</p>
+                <p className="text-lg sm:text-2xl font-bold text-red-600">{disabledCount}</p>
               </div>
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-3 sm:p-4">
             <div className="flex items-center gap-2">
               <Users className="h-4 w-4 text-blue-500" />
               <div>
-                <p className="text-sm font-medium">Usuários Ativos</p>
-                <p className="text-2xl font-bold">{serviceStats.activeUsers}</p>
+                <p className="text-xs sm:text-sm font-medium">Usuários Ativos</p>
+                <p className="text-lg sm:text-2xl font-bold">{serviceStats.activeUsers}</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-4">
+        <Card className="col-span-1 sm:col-span-1">
+          <CardContent className="p-3 sm:p-4">
             <div className="flex items-center gap-2">
               <Settings className="h-4 w-4 text-purple-500" />
               <div>
-                <p className="text-sm font-medium">Total Famílias</p>
-                <p className="text-2xl font-bold">{serviceStats.totalFamilies}</p>
+                <p className="text-xs sm:text-sm font-medium">Total Famílias</p>
+                <p className="text-lg sm:text-2xl font-bold">{serviceStats.totalFamilies}</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-4">
+        <Card className="col-span-1 sm:col-span-1">
+          <CardContent className="p-3 sm:p-4">
             <div className="flex items-center gap-2">
               <Zap className="h-4 w-4 text-yellow-500" />
               <div>
-                <p className="text-sm font-medium">Taxa de Uso</p>
-                <p className="text-2xl font-bold">{Math.round((enabledCount / totalCount) * 100)}%</p>
+                <p className="text-xs sm:text-sm font-medium">Taxa de Uso</p>
+                <p className="text-lg sm:text-2xl font-bold">{Math.round((enabledCount / totalCount) * 100)}%</p>
               </div>
             </div>
           </CardContent>
@@ -261,8 +266,8 @@ export function ServiceManagement() {
 
       {/* Filtros */}
       <Card>
-        <CardContent className="p-4">
-          <div className="flex flex-col md:flex-row gap-4">
+        <CardContent className="p-3 sm:p-4">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
             <div className="flex-1">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -274,9 +279,9 @@ export function ServiceManagement() {
                 />
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-col xs:flex-row gap-2">
               <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger className="w-48">
+                <SelectTrigger className="w-full xs:w-48">
                   <Filter className="h-4 w-4 mr-2" />
                   <SelectValue />
                 </SelectTrigger>
@@ -308,10 +313,10 @@ export function ServiceManagement() {
 
         return (
           <Card key={category}>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
-                  <span className="text-2xl">{getCategoryIcon(category)}</span>
+            <CardHeader className="px-4 py-3 sm:px-6 sm:py-4">
+              <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-2">
+                <CardTitle className="flex flex-wrap items-center gap-2 text-base sm:text-lg">
+                  <span className="text-xl sm:text-2xl">{getCategoryIcon(category)}</span>
                   <span>{getCategoryName(category)}</span>
                   <Badge className={getCategoryColor(category)}>
                     {categoryEnabledCount}/{categoryServices.length} ativos
@@ -329,41 +334,44 @@ export function ServiceManagement() {
                       }
                     }}
                   />
-                  <span className="text-sm text-muted-foreground">Selecionar todos</span>
+                  <span className="text-xs sm:text-sm text-muted-foreground">Selecionar todos</span>
                 </div>
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
+            <CardContent className="px-4 pb-4 sm:px-6">
+              <div className="space-y-3 sm:space-y-4">
                 {categoryServices.map((service) => {
                   const dependents = getServiceDependents(service.id)
                   const canToggle = canToggleService(service.id)
 
                   return (
-                    <div key={service.id} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="flex items-start gap-3">
+                    <div key={service.id} className="flex items-start justify-between p-3 sm:p-4 border rounded-lg">
+                      <div className="flex items-start gap-2 sm:gap-3">
                         <Checkbox
                           checked={selectedServices.includes(service.id)}
                           onCheckedChange={(checked) => handleSelectService(service.id, checked)}
                           disabled={!canToggle}
+                          className="mt-1"
                         />
-                        <span className="text-2xl">{service.icon}</span>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-medium">{service.name}</h4>
+                        <span className="text-xl sm:text-2xl hidden xs:block">{service.icon}</span>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h4 className="font-medium text-sm sm:text-base">{service.name}</h4>
                             {service.isEnabled ? (
-                              <CheckCircle className="h-4 w-4 text-green-500" />
+                              <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-green-500 flex-shrink-0" />
                             ) : (
-                              <XCircle className="h-4 w-4 text-red-500" />
+                              <XCircle className="h-3 w-3 sm:h-4 sm:w-4 text-red-500 flex-shrink-0" />
                             )}
-                            {!canToggle && <Lock className="h-4 w-4 text-gray-400" />}
+                            {!canToggle && <Lock className="h-3 w-3 sm:h-4 sm:w-4 text-gray-400 flex-shrink-0" />}
                           </div>
-                          <p className="text-sm text-muted-foreground mt-1">{service.description}</p>
+                          <p className="text-xs sm:text-sm text-muted-foreground mt-1 line-clamp-2 sm:line-clamp-none">
+                            {service.description}
+                          </p>
 
-                          {/* Dependências */}
+                          {/* Dependências - visíveis apenas em telas maiores */}
                           {service.dependencies && (
-                            <div className="flex items-center gap-1 mt-2">
-                              <Info className="h-3 w-3 text-blue-500" />
+                            <div className="hidden sm:flex items-center gap-1 mt-2">
+                              <Info className="h-3 w-3 text-blue-500 flex-shrink-0" />
                               <span className="text-xs text-blue-600">
                                 Depende de:{" "}
                                 {service.dependencies
@@ -376,19 +384,19 @@ export function ServiceManagement() {
                             </div>
                           )}
 
-                          {/* Dependentes */}
+                          {/* Dependentes - visíveis apenas em telas maiores */}
                           {dependents.length > 0 && (
-                            <div className="flex items-center gap-1 mt-1">
-                              <AlertTriangle className="h-3 w-3 text-orange-500" />
+                            <div className="hidden sm:flex items-center gap-1 mt-1">
+                              <AlertTriangle className="h-3 w-3 text-orange-500 flex-shrink-0" />
                               <span className="text-xs text-orange-600">
                                 Usado por: {dependents.map((d) => d.name).join(", ")}
                               </span>
                             </div>
                           )}
 
-                          {/* Permissões necessárias */}
+                          {/* Permissões necessárias - visíveis apenas em telas maiores */}
                           {service.requiredPermissions && service.requiredPermissions.length > 0 && (
-                            <div className="flex items-center gap-1 mt-1">
+                            <div className="hidden sm:flex items-center gap-1 mt-1">
                               <div className="flex flex-wrap gap-1">
                                 {service.requiredPermissions.map((permission) => (
                                   <Badge key={permission} variant="outline" className="text-xs">
@@ -400,13 +408,13 @@ export function ServiceManagement() {
                           )}
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center ml-2">
                         {service.isEnabled && dependents.some((d) => d.isEnabled) ? (
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
                               <Switch checked={service.isEnabled} disabled={!canToggle} />
                             </AlertDialogTrigger>
-                            <AlertDialogContent>
+                            <AlertDialogContent className="max-w-[90vw] sm:max-w-lg">
                               <AlertDialogHeader>
                                 <AlertDialogTitle>Confirmar Desabilitação</AlertDialogTitle>
                                 <AlertDialogDescription>
@@ -424,7 +432,7 @@ export function ServiceManagement() {
                                   Deseja continuar?
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
-                              <AlertDialogFooter>
+                              <AlertDialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-0">
                                 <AlertDialogCancel>Cancelar</AlertDialogCancel>
                                 <AlertDialogAction onClick={() => toggleService(service.id)}>
                                   Desabilitar

@@ -20,14 +20,14 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
   const [activeTab, setActiveTab] = useState("services")
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-background rounded-lg shadow-xl max-w-7xl w-full max-h-[90vh] overflow-hidden">
-        <div className="flex items-center justify-between p-6 border-b">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-0 sm:p-4">
+      <div className="bg-background rounded-none sm:rounded-lg shadow-xl w-full h-full sm:max-w-7xl sm:w-full sm:max-h-[90vh] sm:h-auto overflow-hidden">
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b">
           <div className="flex items-center gap-3">
-            <Shield className="h-6 w-6 text-primary" />
+            <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
             <div>
-              <h2 className="text-2xl font-bold">Painel de Administração</h2>
-              <p className="text-sm text-muted-foreground">
+              <h2 className="text-xl sm:text-2xl font-bold">Painel de Administração</h2>
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 Logado como: {currentUser.username} ({currentUser.role})
               </p>
             </div>
@@ -37,30 +37,37 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
           </Button>
         </div>
 
-        <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-5">
-              <TabsTrigger value="services" className="flex items-center gap-2">
-                <Settings className="h-4 w-4" />
-                Serviços
-              </TabsTrigger>
-              <TabsTrigger value="users" className="flex items-center gap-2">
-                <Users className="h-4 w-4" />
-                Usuários
-              </TabsTrigger>
-              <TabsTrigger value="roles" className="flex items-center gap-2">
-                <UserCog className="h-4 w-4" />
-                Funções
-              </TabsTrigger>
-              <TabsTrigger value="invitations" className="flex items-center gap-2">
-                <Mail className="h-4 w-4" />
-                Convites
-              </TabsTrigger>
-              <TabsTrigger value="monitoring" className="flex items-center gap-2">
-                <Activity className="h-4 w-4" />
-                Monitoramento
-              </TabsTrigger>
-            </TabsList>
+        <div className="p-4 sm:p-6 overflow-y-auto h-[calc(100%-70px)] sm:max-h-[calc(90vh-120px)]">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0 pb-2">
+              <TabsList className="w-max sm:w-full grid grid-flow-col sm:grid-cols-5 auto-cols-max sm:auto-cols-fr gap-2 sm:gap-0">
+                <TabsTrigger value="services" className="flex items-center gap-2 whitespace-nowrap">
+                  <Settings className="h-4 w-4" />
+                  <span className="hidden sm:inline">Serviços</span>
+                  <span className="sm:hidden">Serv.</span>
+                </TabsTrigger>
+                <TabsTrigger value="users" className="flex items-center gap-2 whitespace-nowrap">
+                  <Users className="h-4 w-4" />
+                  <span className="hidden sm:inline">Usuários</span>
+                  <span className="sm:hidden">Usu.</span>
+                </TabsTrigger>
+                <TabsTrigger value="roles" className="flex items-center gap-2 whitespace-nowrap">
+                  <UserCog className="h-4 w-4" />
+                  <span className="hidden sm:inline">Funções</span>
+                  <span className="sm:hidden">Fun.</span>
+                </TabsTrigger>
+                <TabsTrigger value="invitations" className="flex items-center gap-2 whitespace-nowrap">
+                  <Mail className="h-4 w-4" />
+                  <span className="hidden sm:inline">Convites</span>
+                  <span className="sm:hidden">Conv.</span>
+                </TabsTrigger>
+                <TabsTrigger value="monitoring" className="flex items-center gap-2 whitespace-nowrap">
+                  <Activity className="h-4 w-4" />
+                  <span className="hidden sm:inline">Monitoramento</span>
+                  <span className="sm:hidden">Monit.</span>
+                </TabsTrigger>
+              </TabsList>
+            </div>
 
             <TabsContent value="services" className="mt-6">
               <ServiceManagement />

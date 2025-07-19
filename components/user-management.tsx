@@ -17,12 +17,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Separator } from "@/components/ui/separator"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Users, UserPlus, Edit, Trash2, Shield, Eye, Calendar, Mail } from "lucide-react"
 import { usePermissions } from "../hooks/usePermissions"
+import { ResponsiveTable } from "./responsive-table"
 import type { User } from "../types/admin"
 
 export function UserManagement() {
@@ -113,9 +113,96 @@ export function UserManagement() {
     return [...new Set([...rolePermissions, ...(user.customPermissions || [])])]
   }
 
+  const columns = [
+    {
+      header: "Usuário",
+      accessorKey: "name" as keyof User,
+      cell: (user: User) => (
+        <div className="flex items-center gap-3">
+          <Avatar>
+            <AvatarFallback>{getUserInitials(user.name)}</AvatarFallback>
+          </Avatar>
+          <div>
+            <div className="font-medium">{user.name}</div>
+            <div className="text-sm text-muted-foreground flex items-center gap-1">
+              <Mail className="h-3 w-3" />
+              {user.email}
+            </div>
+          </div>
+        </div>
+      ),
+    },
+    {
+      header: "Função",
+      accessorKey: "roleId" as keyof User,
+      cell: (user: User) => {
+        const role = getRoleById(user.roleId)
+        return (
+          <Badge className={role?.color || "bg-gray-100 text-gray-800"}>{role?.name || "Função não encontrada"}</Badge>
+        )
+      },
+    },
+    {
+      header: "Status",
+      accessorKey: "isActive" as keyof User,
+      cell: (user: User) => (
+        <Badge variant={user.isActive ? "default" : "secondary"}>{user.isActive ? "Ativo" : "Inativo"}</Badge>
+      ),
+    },
+    {
+      header: "Último Login",
+      accessorKey: "lastLogin" as keyof User,
+      cell: (user: User) =>
+        user.lastLogin ? (
+          <div className="flex items-center gap-1 text-sm">
+            <Calendar className="h-3 w-3" />
+            {formatDate(user.lastLogin)}
+          </div>
+        ) : (
+          <span className="text-muted-foreground">Nunca</span>
+        ),
+    },
+    {
+      header: "Ações",
+      accessorKey: "id" as keyof User,
+      cell: (user: User) => (
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setSelectedUser(user)
+              setIsPermissionsDialogOpen(true)
+            }}
+          >
+            <Shield className="h-3 w-3" />
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setSelectedUser(user)
+              setIsEditDialogOpen(true)
+            }}
+          >
+            <Edit className="h-3 w-3" />
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleDeleteUser(user.id)}
+            disabled={user.roleId === "super_admin"}
+          >
+            <Trash2 className="h-3 w-3" />
+          </Button>
+        </div>
+      ),
+    },
+  ]
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h3 className="text-lg font-semibold">Gerenciamento de Usuários</h3>
           <p className="text-sm text-muted-foreground">Gerencie usuários e suas permissões</p>
@@ -127,7 +214,7 @@ export function UserManagement() {
               Novo Usuário
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="sm:max-w-[425px] max-w-[95vw]">
             <DialogHeader>
               <DialogTitle>Criar Novo Usuário</DialogTitle>
               <DialogDescription>Adicione um novo usuário ao sistema</DialogDescription>
@@ -176,7 +263,7 @@ export function UserManagement() {
                 <Label htmlFor="active">Usuário ativo</Label>
               </div>
             </div>
-            <DialogFooter>
+            <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-0">
               <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
                 Cancelar
               </Button>
@@ -197,100 +284,13 @@ export function UserManagement() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Usuário</TableHead>
-                <TableHead>Função</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Último Login</TableHead>
-                <TableHead>Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {users.map((user) => {
-                const role = getRoleById(user.roleId)
-                const effectivePermissions = getEffectivePermissions(user)
-
-                return (
-                  <TableRow key={user.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <Avatar>
-                          <AvatarFallback>{getUserInitials(user.name)}</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <div className="font-medium">{user.name}</div>
-                          <div className="text-sm text-muted-foreground flex items-center gap-1">
-                            <Mail className="h-3 w-3" />
-                            {user.email}
-                          </div>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={role?.color || "bg-gray-100 text-gray-800"}>
-                        {role?.name || "Função não encontrada"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={user.isActive ? "default" : "secondary"}>
-                        {user.isActive ? "Ativo" : "Inativo"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {user.lastLogin ? (
-                        <div className="flex items-center gap-1 text-sm">
-                          <Calendar className="h-3 w-3" />
-                          {formatDate(user.lastLogin)}
-                        </div>
-                      ) : (
-                        <span className="text-muted-foreground">Nunca</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setSelectedUser(user)
-                            setIsPermissionsDialogOpen(true)
-                          }}
-                        >
-                          <Shield className="h-3 w-3" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setSelectedUser(user)
-                            setIsEditDialogOpen(true)
-                          }}
-                        >
-                          <Edit className="h-3 w-3" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDeleteUser(user.id)}
-                          disabled={user.roleId === "super_admin"}
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                )
-              })}
-            </TableBody>
-          </Table>
+          <ResponsiveTable data={users} columns={columns} keyField="id" emptyMessage="Nenhum usuário cadastrado" />
         </CardContent>
       </Card>
 
       {/* Dialog de Edição */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[425px] max-w-[95vw]">
           <DialogHeader>
             <DialogTitle>Editar Usuário</DialogTitle>
             <DialogDescription>Altere as informações do usuário</DialogDescription>
@@ -342,7 +342,7 @@ export function UserManagement() {
               </div>
             </div>
           )}
-          <DialogFooter>
+          <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-0">
             <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
               Cancelar
             </Button>
@@ -362,14 +362,14 @@ export function UserManagement() {
 
       {/* Dialog de Permissões */}
       <Dialog open={isPermissionsDialogOpen} onOpenChange={setIsPermissionsDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-[95vw] sm:max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Gerenciar Permissões</DialogTitle>
             <DialogDescription>Gerencie as permissões específicas para {selectedUser?.name}</DialogDescription>
           </DialogHeader>
           {selectedUser && (
             <div className="space-y-6">
-              <div className="flex items-center gap-4 p-4 bg-muted rounded-lg">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 bg-muted rounded-lg">
                 <Avatar>
                   <AvatarFallback>{getUserInitials(selectedUser.name)}</AvatarFallback>
                 </Avatar>
@@ -387,7 +387,7 @@ export function UserManagement() {
                 <p className="text-sm text-muted-foreground mb-4">
                   Estas permissões são herdadas da função atribuída ao usuário
                 </p>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {(getRoleById(selectedUser.roleId)?.permissions || []).map((permissionId) => {
                     const permission = permissions.find((p) => p.id === permissionId)
                     if (!permission) return null
@@ -429,21 +429,22 @@ export function UserManagement() {
 
                           return (
                             <div key={permission.id} className="flex items-center justify-between p-3 border rounded">
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2">
-                                  <span className="font-medium">{permission.name}</span>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className="font-medium text-sm">{permission.name}</span>
                                   {hasFromRole && (
                                     <Badge variant="outline" className="text-xs">
                                       Da função
                                     </Badge>
                                   )}
                                 </div>
-                                <p className="text-sm text-muted-foreground">{permission.description}</p>
+                                <p className="text-xs text-muted-foreground line-clamp-2">{permission.description}</p>
                               </div>
                               <Checkbox
                                 checked={hasCustom}
                                 onCheckedChange={() => handleToggleCustomPermission(permission.id)}
                                 disabled={hasFromRole}
+                                className="ml-2"
                               />
                             </div>
                           )

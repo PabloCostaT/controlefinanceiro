@@ -1,25 +1,28 @@
 import Link from "next/link"
-import { Separator } from "@/components/ui/separator"
+import { Wallet } from "lucide-react"
 
 export function Footer() {
+  const currentYear = new Date().getFullYear()
+
   return (
-    <footer className="mt-16 border-t bg-muted/50">
+    <footer className="border-t bg-background">
       <div className="container mx-auto px-4 py-8">
-        <div className="grid gap-8 md:grid-cols-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Logo e Descrição */}
-          <div className="md:col-span-2">
-            <h3 className="text-lg font-semibold mb-3">Controle de Despesas Familiares</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              Gerencie e divida as despesas da casa entre os membros da família de forma simples e organizada.
-            </p>
-            <p className="text-xs text-muted-foreground">
-              © 2024 Controle de Despesas Familiares. Todos os direitos reservados.
+          <div className="col-span-1 md:col-span-2">
+            <div className="flex items-center gap-2 font-semibold text-lg mb-2">
+              <Wallet className="h-6 w-6 text-primary" />
+              <span>FinançaFamília</span>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Simplifique o controle financeiro da sua família com nossa plataforma intuitiva de gerenciamento de
+              despesas.
             </p>
           </div>
 
           {/* Links Legais */}
-          <div>
-            <h4 className="text-sm font-semibold mb-3">Legal</h4>
+          <div className="space-y-3">
+            <h3 className="font-medium">Legal</h3>
             <ul className="space-y-2 text-sm">
               <li>
                 <Link href="/termos" className="text-muted-foreground hover:text-foreground transition-colors">
@@ -39,9 +42,9 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Suporte */}
-          <div>
-            <h4 className="text-sm font-semibold mb-3">Suporte</h4>
+          {/* Links de Suporte */}
+          <div className="space-y-3">
+            <h3 className="font-medium">Suporte</h3>
             <ul className="space-y-2 text-sm">
               <li>
                 <Link href="/ajuda" className="text-muted-foreground hover:text-foreground transition-colors">
@@ -62,16 +65,11 @@ export function Footer() {
           </div>
         </div>
 
-        <Separator className="my-6" />
-
-        {/* Informações Adicionais */}
-        <div className="flex flex-col md:flex-row justify-between items-center text-xs text-muted-foreground">
-          <div className="mb-2 md:mb-0">
-            <span>Versão 1.0.0 • Última atualização: {new Date().toLocaleDateString("pt-BR")}</span>
-          </div>
-          <div className="flex items-center space-x-4">
-            <span>Desenvolvido com ❤️ para famílias</span>
-          </div>
+        <div className="border-t mt-8 pt-6 flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-xs text-muted-foreground text-center md:text-left">
+            &copy; {currentYear} FinançaFamília. Todos os direitos reservados.
+          </p>
+          <p className="text-xs text-muted-foreground">Versão 1.0.0 | Atualizado em 19/07/2024</p>
         </div>
       </div>
     </footer>
