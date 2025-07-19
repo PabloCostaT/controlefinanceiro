@@ -5,7 +5,7 @@ import { useAdmin } from "../hooks/useAdmin"
 import { AddMemberForm } from "../components/add-member-form"
 import { ExpenseList } from "../components/expense-list"
 import { MemberList } from "../components/member-list"
-import { Users, Receipt, FolderOpen, Repeat, Wallet, TrendingUp } from "lucide-react"
+import { Users, Receipt, FolderOpen, Repeat, Wallet, TrendingUp, Shield } from "lucide-react"
 import { useState } from "react"
 import { EnhancedExpenseForm } from "../components/enhanced-expense-form"
 import { Button } from "@/components/ui/button"
@@ -15,6 +15,7 @@ import { RecurringExpensesManager } from "../components/recurring-expenses-manag
 import { WalletManagement } from "../components/wallet-management"
 import { FinancialDashboard } from "../components/financial-dashboard"
 import { AdminPanel } from "../components/admin-panel"
+import { ThemeToggle } from "../components/theme-toggle"
 
 export default function ExpenseTracker() {
   const {
@@ -168,9 +169,25 @@ export default function ExpenseTracker() {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto p-2 sm:p-4">
-        <div className="mb-4 text-center">
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-1">Dashboard Financeiro</h1>
-          <p className="text-muted-foreground text-xs sm:text-sm">Visão geral das suas finanças familiares</p>
+        <div className="mb-4">
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-center flex-1">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-1">Dashboard Financeiro</h1>
+              <p className="text-muted-foreground text-xs sm:text-sm">Visão geral das suas finanças familiares</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentView("admin")}
+                className="flex items-center gap-2"
+              >
+                <Shield className="h-4 w-4" />
+                <span className="hidden sm:inline">Admin</span>
+              </Button>
+            </div>
+          </div>
         </div>
 
         {/* Botão de acesso rápido para Nova Despesa - mais compacto */}
