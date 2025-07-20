@@ -4,12 +4,13 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Shield, Activity, AlertTriangle, Settings, Users, UserCog, Mail } from "lucide-react"
+import { Shield, Activity, AlertTriangle, Settings, Users, UserCog, Mail, Database } from "lucide-react"
 import { useAdmin } from "../hooks/useAdmin"
 import { ServiceManagement } from "./service-management"
 import { UserManagement } from "./user-management"
 import { RoleManagement } from "./role-management"
 import { InvitationManagement } from "./invitation-management"
+import { SystemManagement } from "./system-management"
 
 interface AdminPanelProps {
   onClose: () => void
@@ -40,7 +41,7 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
         <div className="p-4 sm:p-6 overflow-y-auto h-[calc(100%-70px)] sm:max-h-[calc(90vh-120px)]">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0 pb-2">
-              <TabsList className="w-max sm:w-full grid grid-flow-col sm:grid-cols-5 auto-cols-max sm:auto-cols-fr gap-2 sm:gap-0">
+              <TabsList className="w-max sm:w-full grid grid-flow-col sm:grid-cols-6 auto-cols-max sm:auto-cols-fr gap-2 sm:gap-0">
                 <TabsTrigger value="services" className="flex items-center gap-2 whitespace-nowrap">
                   <Settings className="h-4 w-4" />
                   <span className="hidden sm:inline">Serviços</span>
@@ -60,6 +61,11 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
                   <Mail className="h-4 w-4" />
                   <span className="hidden sm:inline">Convites</span>
                   <span className="sm:hidden">Conv.</span>
+                </TabsTrigger>
+                <TabsTrigger value="system" className="flex items-center gap-2 whitespace-nowrap">
+                  <Database className="h-4 w-4" />
+                  <span className="hidden sm:inline">Sistema</span>
+                  <span className="sm:hidden">Sist.</span>
                 </TabsTrigger>
                 <TabsTrigger value="monitoring" className="flex items-center gap-2 whitespace-nowrap">
                   <Activity className="h-4 w-4" />
@@ -83,6 +89,10 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
 
             <TabsContent value="invitations" className="mt-6">
               <InvitationManagement />
+            </TabsContent>
+
+            <TabsContent value="system" className="mt-6">
+              <SystemManagement />
             </TabsContent>
 
             <TabsContent value="monitoring" className="mt-6">

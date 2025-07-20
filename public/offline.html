@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline - Controle Financeiro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 400px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+        }
+        
+        h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        p {
+            font-size: 16px;
+            line-height: 1.5;
+            opacity: 0.9;
+            margin-bottom: 30px;
+        }
+        
+        .features {
+            text-align: left;
+            margin-bottom: 30px;
+        }
+        
+        .feature {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        
+        .feature-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+        
+        .retry-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .retry-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .status {
+            margin-top: 20px;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 30px 20px;
+            }
+            
+            h1 {
+                font-size: 20px;
+            }
+            
+            p {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon pulse">
+            📱
+        </div>
+        
+        <h1>Você está offline</h1>
+        <p>Não se preocupe! O Controle Financeiro funciona offline e suas alterações serão sincronizadas quando você voltar online.</p>
+        
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">✓</div>
+                <span>Adicionar novas despesas</span>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">✓</div>
+                <span>Visualizar dados salvos</span>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">✓</div>
+                <span>Gerenciar membros e projetos</span>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">✓</div>
+                <span>Sincronização automática</span>
+            </div>
+        </div>
+        
+        <a href="/" class="retry-btn" onclick="checkConnection()">
+            Tentar Novamente
+        </a>
+        
+        <div class="status" id="status">
+            Verificando conexão...
+        </div>
+    </div>
+
+    <script>
+        function checkConnection() {
+            const status = document.getElementById('status');
+            
+            if (navigator.onLine) {
+                status.textContent = 'Conectado! Redirecionando...';
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 1000);
+            } else {
+                status.textContent = 'Ainda offline. Tente novamente em alguns instantes.';
+            }
+        }
+        
+        // Verificar conexão automaticamente
+        window.addEventListener('online', () => {
+            document.getElementById('status').textContent = 'Conexão restaurada! Redirecionando...';
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 1500);
+        });
+        
+        window.addEventListener('offline', () => {
+            document.getElementById('status').textContent = 'Conexão perdida.';
+        });
+        
+        // Verificação inicial
+        setTimeout(checkConnection, 1000);
+    </script>
+</body>
+</html>
