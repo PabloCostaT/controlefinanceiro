@@ -1,163 +1,191 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Receipt } from "lucide-react"
-import type { FamilyMember } from "../types/expense"
+import { useExpenses } from "@/hooks/useExpenses"
+import { toast } from "sonner"
+import { PlusCircle, DollarSign } from "lucide-react"
 
-interface AddExpenseFormProps {
-  members: FamilyMember[]
-  onAddExpense: (expense: {
-    description: string
-    amount: number
-    date: string
-    paidBy: string
-    category: string
-    splitBetween: string[]
-  }) => void
-}
+export function AddExpenseForm() {
+  const { members, projects, addExpense } = useExpenses()
+  const [isLoading, setIsLoading] = useState(false)
+  const [formData, setFormData] = useState({
+    description: "",
+    amount: "",
+    category: "alimentacao",
+    memberId: members.length > 0 ? members[0].id : "",
+    projectId: "none",
+  })
 
-const categories = ["Alimentação", "Utilidades", "Transporte", "Saúde", "Educação", "Lazer", "Casa", "Outros"]
-
-export function AddExpenseForm({ members, onAddExpense }: AddExpenseFormProps) {
-  const [description, setDescription] = useState("")
-  const [amount, setAmount] = useState("")
-  const [date, setDate] = useState(new Date().toISOString().split("T")[0])
-  const [paidBy, setPaidBy] = useState("")
-  const [category, setCategory] = useState("")
-  const [splitBetween, setSplitBetween] = useState<string[]>([])
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (description.trim() && amount && paidBy && category && splitBetween.length > 0) {
-      onAddExpense({
-        description: description.trim(),
-        amount: Number.parseFloat(amount),
-        date,
-        paidBy,
-        category,
-        splitBetween,
+
+    if (!formData.description.trim() || !formData.amount || !formData.memberId) {
+      toast.error("Preencha todos os campos obrigatórios")
+      return
+    }
+
+    setIsLoading(true)
+
+    try {
+      const expense = {
+        description: formData.description.trim(),
+        amount: Number.parseFloat(formData.amount),
+        category: formData.category,
+        paidBy: formData.memberId,
+        projectId: formData.projectId !== "none" ? formData.projectId : undefined,
+        date: new Date().toISOString(),
+        splitBetween: [formData.memberId],
+      }
+
+      addExpense(expense)
+
+      // Reset form
+      setFormData({
+        description: "",
+        amount: "",
+        category: "alimentacao",
+        memberId: members.length > 0 ? members[0].id : "",
+        projectId: "none",
       })
-      setDescription("")
-      setAmount("")
-      setDate(new Date().toISOString().split("T")[0])
-      setPaidBy("")
-      setCategory("")
-      setSplitBetween([])
+
+      toast.success("Despesa adicionada com sucesso!")
+    } catch (error) {
+      toast.error("Erro ao adicionar despesa")
+    } finally {
+      setIsLoading(false)
     }
   }
 
-  const handleMemberToggle = (memberId: string, checked: boolean) => {
-    if (checked) {
-      setSplitBetween((prev) => [...prev, memberId])
-    } else {
-      setSplitBetween((prev) => prev.filter((id) => id !== memberId))
-    }
-  }
+  const categories = [
+    { value: "alimentacao", label: "🍽️ Alimentação" },
+    { value: "transporte", label: "🚗 Transporte" },
+    { value: "saude", label: "🏥 Saúde" },
+    { value: "educacao", label: "📚 Educação" },
+    { value: "lazer", label: "🎮 Lazer" },
+    { value: "casa", label: "🏠 Casa" },
+    { value: "outros", label: "📦 Outros" },
+  ]
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Receipt className="h-5 w-5" />
-          Adicionar Despesa
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label htmlFor="description">Descrição *</Label>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Linha 1: Descrição e Valor */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="description" className="text-sm font-medium">
+            Descrição *
+          </Label>
+          <Input
+            id="description"
+            placeholder="Ex: Almoço no restaurante"
+            value={formData.description}
+            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            className="h-10"
+            required
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="amount" className="text-sm font-medium">
+            Valor (R$) *
+          </Label>
+          <div className="relative">
+            <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Descrição da despesa"
+              id="amount"
+              type="number"
+              step="0.01"
+              placeholder="0,00"
+              value={formData.amount}
+              onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+              className="h-10 pl-10"
               required
             />
           </div>
+        </div>
+      </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="amount">Valor (R$) *</Label>
-              <Input
-                id="amount"
-                type="number"
-                step="0.01"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder="0,00"
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="date">Data *</Label>
-              <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label>Pago por *</Label>
-              <Select value={paidBy} onValueChange={setPaidBy}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione quem pagou" />
-                </SelectTrigger>
-                <SelectContent>
-                  {members.map((member) => (
-                    <SelectItem key={member.id} value={member.id}>
-                      {member.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>Categoria *</Label>
-              <Select value={category} onValueChange={setCategory}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione a categoria" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map((cat) => (
-                    <SelectItem key={cat} value={cat}>
-                      {cat}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div>
-            <Label>Dividir entre *</Label>
-            <div className="grid grid-cols-2 gap-2 mt-2">
-              {members.map((member) => (
-                <div key={member.id} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`member-${member.id}`}
-                    checked={splitBetween.includes(member.id)}
-                    onCheckedChange={(checked) => handleMemberToggle(member.id, checked as boolean)}
-                  />
-                  <Label htmlFor={`member-${member.id}`} className="text-sm">
-                    {member.name}
-                  </Label>
-                </div>
+      {/* Linha 2: Categoria e Membro */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">Categoria *</Label>
+          <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
+            <SelectTrigger className="h-10">
+              <SelectValue placeholder="Selecione uma categoria" />
+            </SelectTrigger>
+            <SelectContent>
+              {categories.map((category) => (
+                <SelectItem key={category.value} value={category.value}>
+                  {category.label}
+                </SelectItem>
               ))}
-            </div>
-          </div>
+            </SelectContent>
+          </Select>
+        </div>
 
-          <Button type="submit" className="w-full">
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">Quem pagou? *</Label>
+          <Select value={formData.memberId} onValueChange={(value) => setFormData({ ...formData, memberId: value })}>
+            <SelectTrigger className="h-10">
+              <SelectValue placeholder="Selecione o membro" />
+            </SelectTrigger>
+            <SelectContent>
+              {members.map((member) => (
+                <SelectItem key={member.id} value={member.id}>
+                  👤 {member.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      {/* Linha 3: Projeto (opcional) */}
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">Projeto (Opcional)</Label>
+        <Select value={formData.projectId} onValueChange={(value) => setFormData({ ...formData, projectId: value })}>
+          <SelectTrigger className="h-10">
+            <SelectValue placeholder="Selecione um projeto ou deixe em branco" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="none">Nenhum projeto</SelectItem>
+            {projects.map((project) => (
+              <SelectItem key={project.id} value={project.id}>
+                📁 {project.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Botão de submit */}
+      <Button type="submit" className="w-full h-11 text-base font-medium" disabled={isLoading}>
+        {isLoading ? (
+          <>
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+            Adicionando...
+          </>
+        ) : (
+          <>
+            <PlusCircle className="h-4 w-4 mr-2" />
             Adicionar Despesa
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+          </>
+        )}
+      </Button>
+
+      {/* Dicas rápidas */}
+      <div className="text-xs text-muted-foreground bg-muted/30 p-3 rounded-lg">
+        <p className="font-medium mb-1">💡 Dicas rápidas:</p>
+        <ul className="space-y-1">
+          <li>• Use descrições claras como "Supermercado Extra" ou "Uber para trabalho"</li>
+          <li>• Categorize corretamente para relatórios mais precisos</li>
+          <li>• Projetos ajudam a organizar gastos específicos (viagens, reformas, etc.)</li>
+        </ul>
+      </div>
+    </form>
   )
 }

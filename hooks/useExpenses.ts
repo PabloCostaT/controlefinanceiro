@@ -226,7 +226,7 @@ export function useExpenses() {
             date: new Date().toISOString().split("T")[0],
             paidBy: recurringExpense.responsibleId,
             category: recurringExpense.category,
-            splitBetween: recurringExpense.splitBetween,
+            splitBetween: recurringExpense.splitBetween || [recurringExpense.responsibleId],
             projectId: recurringExpense.projectId,
             fromRecurring: recurringExpenseId,
             notes: `Despesa fixa: ${recurringExpense.name}`,
@@ -314,6 +314,7 @@ export function useExpenses() {
       const newExpense: Expense = {
         ...expense,
         id: Date.now().toString(),
+        splitBetween: expense.splitBetween || [expense.paidBy],
       }
       setExpenses((prev) => [...prev, newExpense])
 
@@ -356,8 +357,8 @@ export function useExpenses() {
         .reduce((sum, expense) => sum + expense.amount, 0)
 
       const totalOwed = expenses
-        .filter((expense) => expense.splitBetween.includes(member.id))
-        .reduce((sum, expense) => sum + expense.amount / expense.splitBetween.length, 0)
+        .filter((expense) => (expense.splitBetween || []).includes(member.id))
+        .reduce((sum, expense) => sum + expense.amount / (expense.splitBetween?.length || 1), 0)
 
       return {
         memberId: member.id,
@@ -411,8 +412,8 @@ export function useExpenses() {
           .reduce((sum, expense) => sum + expense.amount, 0)
 
         const totalOwed = projectExpenses
-          .filter((expense) => expense.splitBetween.includes(member.id))
-          .reduce((sum, expense) => sum + expense.amount / expense.splitBetween.length, 0)
+          .filter((expense) => (expense.splitBetween || []).includes(member.id))
+          .reduce((sum, expense) => sum + expense.amount / (expense.splitBetween?.length || 1), 0)
 
         return {
           memberId: member.id,

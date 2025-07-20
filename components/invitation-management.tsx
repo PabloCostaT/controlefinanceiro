@@ -1,10 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -17,196 +16,184 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Label } from "@/components/ui/label"
 import {
   Mail,
-  UserPlus,
   Send,
-  Copy,
-  RefreshCw,
-  X,
   Clock,
   CheckCircle,
   XCircle,
-  AlertCircle,
-  Calendar,
+  AlertTriangle,
+  MoreHorizontal,
+  Copy,
+  RefreshCw,
+  Trash2,
+  Crown,
+  Shield,
   User,
+  Calendar,
+  ExternalLink,
 } from "lucide-react"
-import { useInvitations } from "../hooks/useInvitations"
 import { usePermissions } from "../hooks/usePermissions"
 import { toast } from "@/hooks/use-toast"
 
 export function InvitationManagement() {
-  const {
-    invitations,
-    createInvitation,
-    cancelInvitation,
-    resendInvitation,
-    getPendingInvitations,
-    getExpiredInvitations,
-    sendEmail,
-  } = useInvitations()
-
-  const { roles, getRoleById } = usePermissions()
+  const { invitations, roles, currentUser, canInviteRole, createInvitation, cancelInvitation, resendInvitation } =
+    usePermissions()
 
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-
-  const [newInvitation, setNewInvitation] = useState({
+  const [formData, setFormData] = useState({
     email: "",
     roleId: "",
     message: "",
-    expiresInDays: 7,
   })
 
-  const handleCreateInvitation = async () => {
-    if (!newInvitation.email || !newInvitation.roleId) {
-      toast({
-        title: "Erro",
-        description: "Email e função são obrigatórios",
-        variant: "destructive",
-      })
-      return
-    }
-
-    setIsLoading(true)
-    try {
-      const invitation = createInvitation({
-        ...newInvitation,
-        invitedBy: "admin-1", // Em um sistema real, seria o ID do usuário logado
-      })
-
-      const role = getRoleById(newInvitation.roleId)
-      await sendEmail(invitation, role?.name || "Usuário", "Administrador")
-
-      toast({
-        title: "Convite enviado!",
-        description: `Convite enviado para ${newInvitation.email}`,
-      })
-
-      setNewInvitation({ email: "", roleId: "", message: "", expiresInDays: 7 })
-      setIsCreateDialogOpen(false)
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Falha ao enviar convite",
-        variant: "destructive",
-      })
-    } finally {
-      setIsLoading(false)
+  const getRoleIcon = (roleId: string) => {
+    switch (roleId) {
+      case "super_admin":
+        return <Crown className="h-4 w-4 text-red-500" />
+      case "admin":
+        return <Shield className="h-4 w-4 text-blue-500" />
+      case "user":
+        return <User className="h-4 w-4 text-green-500" />
+      default:
+        return <User className="h-4 w-4" />
     }
   }
 
-  const handleResendInvitation = async (invitationId: string) => {
-    setIsLoading(true)
-    try {
-      resendInvitation(invitationId)
-      const invitation = invitations.find((inv) => inv.id === invitationId)
-      if (invitation) {
-        const role = getRoleById(invitation.roleId)
-        await sendEmail(invitation, role?.name || "Usuário", "Administrador")
-      }
-
-      toast({
-        title: "Convite reenviado!",
-        description: "O convite foi reenviado com sucesso",
-      })
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Falha ao reenviar convite",
-        variant: "destructive",
-      })
-    } finally {
-      setIsLoading(false)
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "pending":
+        return (
+          <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200">
+            <Clock className="h-3 w-3 mr-1" />
+            Pendente
+          </Badge>
+        )
+      case "accepted":
+        return (
+          <Badge className="bg-green-100 text-green-800 border-green-200">
+            <CheckCircle className="h-3 w-3 mr-1" />
+            Aceito
+          </Badge>
+        )
+      case "expired":
+        return (
+          <Badge className="bg-red-100 text-red-800 border-red-200">
+            <XCircle className="h-3 w-3 mr-1" />
+            Expirado
+          </Badge>
+        )
+      case "cancelled":
+        return (
+          <Badge className="bg-gray-100 text-gray-800 border-gray-200">
+            <XCircle className="h-3 w-3 mr-1" />
+            Cancelado
+          </Badge>
+        )
+      default:
+        return <Badge variant="outline">{status}</Badge>
     }
+  }
+
+  const handleCreateInvitation = () => {
+    if (!formData.email || !formData.roleId) return
+
+    createInvitation({
+      email: formData.email,
+      roleId: formData.roleId,
+      message: formData.message || undefined,
+    })
+
+    setFormData({ email: "", roleId: "", message: "" })
+    setIsCreateDialogOpen(false)
+
+    toast({
+      title: "Convite enviado",
+      description: `Convite enviado para ${formData.email}`,
+    })
+  }
+
+  const handleCopyInviteLink = (token: string) => {
+    const inviteUrl = `${window.location.origin}/convite/${token}`
+    navigator.clipboard.writeText(inviteUrl)
+
+    toast({
+      title: "Link copiado",
+      description: "Link do convite copiado para a área de transferência",
+    })
+  }
+
+  const handleResendInvitation = (invitationId: string) => {
+    resendInvitation(invitationId)
+
+    toast({
+      title: "Convite reenviado",
+      description: "Um novo convite foi enviado",
+    })
   }
 
   const handleCancelInvitation = (invitationId: string) => {
     cancelInvitation(invitationId)
+
     toast({
       title: "Convite cancelado",
       description: "O convite foi cancelado com sucesso",
     })
   }
 
-  const copyInvitationLink = (token: string) => {
-    const link = `${window.location.origin}/convite/${token}`
-    navigator.clipboard.writeText(link)
-    toast({
-      title: "Link copiado!",
-      description: "Link do convite copiado para a área de transferência",
-    })
+  const availableRoles = roles.filter((role) => canInviteRole(currentUser, role.id))
+
+  const invitationStats = {
+    total: invitations.length,
+    pending: invitations.filter((i) => i.status === "pending").length,
+    accepted: invitations.filter((i) => i.status === "accepted").length,
+    expired: invitations.filter((i) => i.status === "expired").length,
   }
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("pt-BR", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    })
+  const isExpired = (expiresAt: string) => {
+    return new Date(expiresAt) < new Date()
   }
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "pending":
-        return <Clock className="h-4 w-4 text-yellow-500" />
-      case "accepted":
-        return <CheckCircle className="h-4 w-4 text-green-500" />
-      case "expired":
-        return <XCircle className="h-4 w-4 text-red-500" />
-      case "cancelled":
-        return <X className="h-4 w-4 text-gray-500" />
-      default:
-        return <AlertCircle className="h-4 w-4 text-gray-500" />
-    }
-  }
-
-  const getStatusBadge = (status: string) => {
-    const variants = {
-      pending: "default",
-      accepted: "default",
-      expired: "destructive",
-      cancelled: "secondary",
-    } as const
-
-    const labels = {
-      pending: "Pendente",
-      accepted: "Aceito",
-      expired: "Expirado",
-      cancelled: "Cancelado",
-    }
-
-    return (
-      <Badge variant={variants[status as keyof typeof variants] || "secondary"}>
-        {labels[status as keyof typeof labels] || status}
-      </Badge>
-    )
-  }
-
-  const pendingInvitations = getPendingInvitations()
-  const expiredInvitations = getExpiredInvitations()
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h3 className="text-lg font-semibold">Gerenciamento de Convites</h3>
-          <p className="text-sm text-muted-foreground">Envie convites para novos usuários</p>
+          <p className="text-sm text-muted-foreground">
+            Envie convites para novos usuários e gerencie convites pendentes
+          </p>
         </div>
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="flex items-center gap-2">
-              <Mail className="h-4 w-4" />
-              Enviar Convite
+            <Button>
+              <Send className="h-4 w-4 mr-2" />
+              Novo Convite
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Enviar Convite</DialogTitle>
-              <DialogDescription>Convide um novo usuário para o sistema</DialogDescription>
+              <DialogDescription>Convide um novo usuário para se juntar ao sistema</DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div>
@@ -214,46 +201,29 @@ export function InvitationManagement() {
                 <Input
                   id="email"
                   type="email"
-                  value={newInvitation.email}
-                  onChange={(e) => setNewInvitation({ ...newInvitation, email: e.target.value })}
-                  placeholder="usuario@exemplo.com"
+                  value={formData.email}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
+                  placeholder="email@exemplo.com"
                 />
               </div>
               <div>
                 <Label htmlFor="role">Função</Label>
                 <Select
-                  value={newInvitation.roleId}
-                  onValueChange={(value) => setNewInvitation({ ...newInvitation, roleId: value })}
+                  value={formData.roleId}
+                  onValueChange={(value) => setFormData((prev) => ({ ...prev, roleId: value }))}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione uma função" />
                   </SelectTrigger>
                   <SelectContent>
-                    {roles.map((role) => (
+                    {availableRoles.map((role) => (
                       <SelectItem key={role.id} value={role.id}>
-                        {role.name}
+                        <div className="flex items-center gap-2">
+                          {getRoleIcon(role.id)}
+                          {role.name}
+                        </div>
                       </SelectItem>
                     ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="expires">Expira em (dias)</Label>
-                <Select
-                  value={newInvitation.expiresInDays.toString()}
-                  onValueChange={(value) =>
-                    setNewInvitation({ ...newInvitation, expiresInDays: Number.parseInt(value) })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="1">1 dia</SelectItem>
-                    <SelectItem value="3">3 dias</SelectItem>
-                    <SelectItem value="7">7 dias</SelectItem>
-                    <SelectItem value="14">14 dias</SelectItem>
-                    <SelectItem value="30">30 dias</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -261,9 +231,9 @@ export function InvitationManagement() {
                 <Label htmlFor="message">Mensagem (opcional)</Label>
                 <Textarea
                   id="message"
-                  value={newInvitation.message}
-                  onChange={(e) => setNewInvitation({ ...newInvitation, message: e.target.value })}
-                  placeholder="Adicione uma mensagem personalizada..."
+                  value={formData.message}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, message: e.target.value }))}
+                  placeholder="Adicione uma mensagem personalizada ao convite..."
                   rows={3}
                 />
               </div>
@@ -272,18 +242,9 @@ export function InvitationManagement() {
               <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
                 Cancelar
               </Button>
-              <Button onClick={handleCreateInvitation} disabled={isLoading}>
-                {isLoading ? (
-                  <>
-                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                    Enviando...
-                  </>
-                ) : (
-                  <>
-                    <Send className="h-4 w-4 mr-2" />
-                    Enviar Convite
-                  </>
-                )}
+              <Button onClick={handleCreateInvitation}>
+                <Send className="h-4 w-4 mr-2" />
+                Enviar Convite
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -291,14 +252,25 @@ export function InvitationManagement() {
       </div>
 
       {/* Estatísticas */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <Mail className="h-4 w-4 text-blue-500" />
+              <div>
+                <p className="text-sm font-medium">Total</p>
+                <p className="text-2xl font-bold">{invitationStats.total}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
               <Clock className="h-4 w-4 text-yellow-500" />
               <div>
                 <p className="text-sm font-medium">Pendentes</p>
-                <p className="text-2xl font-bold">{pendingInvitations.length}</p>
+                <p className="text-2xl font-bold text-yellow-600">{invitationStats.pending}</p>
               </div>
             </div>
           </CardContent>
@@ -309,7 +281,7 @@ export function InvitationManagement() {
               <CheckCircle className="h-4 w-4 text-green-500" />
               <div>
                 <p className="text-sm font-medium">Aceitos</p>
-                <p className="text-2xl font-bold">{invitations.filter((inv) => inv.status === "accepted").length}</p>
+                <p className="text-2xl font-bold text-green-600">{invitationStats.accepted}</p>
               </div>
             </div>
           </CardContent>
@@ -320,18 +292,7 @@ export function InvitationManagement() {
               <XCircle className="h-4 w-4 text-red-500" />
               <div>
                 <p className="text-sm font-medium">Expirados</p>
-                <p className="text-2xl font-bold">{expiredInvitations.length}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <Mail className="h-4 w-4 text-blue-500" />
-              <div>
-                <p className="text-sm font-medium">Total</p>
-                <p className="text-2xl font-bold">{invitations.length}</p>
+                <p className="text-2xl font-bold text-red-600">{invitationStats.expired}</p>
               </div>
             </div>
           </CardContent>
@@ -342,86 +303,126 @@ export function InvitationManagement() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <UserPlus className="h-5 w-5" />
-            Convites Enviados
+            <Mail className="h-5 w-5" />
+            Convites ({invitations.length})
           </CardTitle>
-          <CardDescription>Gerencie todos os convites enviados</CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Email</TableHead>
-                <TableHead>Função</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Enviado em</TableHead>
-                <TableHead>Expira em</TableHead>
-                <TableHead>Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {invitations.map((invitation) => {
-                const role = getRoleById(invitation.roleId)
-                const isExpired = new Date() > new Date(invitation.expiresAt)
+          <div className="space-y-4">
+            {invitations.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <Mail className="h-8 w-8 mx-auto mb-2" />
+                <p>Nenhum convite enviado ainda</p>
+                <p className="text-sm">Clique em "Novo Convite" para começar</p>
+              </div>
+            ) : (
+              invitations.map((invitation) => {
+                const role = roles.find((r) => r.id === invitation.roleId)
+                const expired = isExpired(invitation.expiresAt)
+                const canResend = invitation.status === "pending" || invitation.status === "expired"
+                const canCancel = invitation.status === "pending"
 
                 return (
-                  <TableRow key={invitation.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <User className="h-4 w-4 text-muted-foreground" />
-                        {invitation.email}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={role?.color || "bg-gray-100 text-gray-800"}>
-                        {role?.name || "Função não encontrada"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        {getStatusIcon(isExpired && invitation.status === "pending" ? "expired" : invitation.status)}
-                        {getStatusBadge(isExpired && invitation.status === "pending" ? "expired" : invitation.status)}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1 text-sm">
-                        <Calendar className="h-3 w-3" />
-                        {formatDate(invitation.invitedAt)}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1 text-sm">
-                        <Calendar className="h-3 w-3" />
-                        {formatDate(invitation.expiresAt)}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm" onClick={() => copyInvitationLink(invitation.token)}>
-                          <Copy className="h-3 w-3" />
-                        </Button>
-                        {invitation.status === "pending" && !isExpired && (
-                          <>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleResendInvitation(invitation.id)}
-                              disabled={isLoading}
-                            >
-                              <RefreshCw className="h-3 w-3" />
-                            </Button>
-                            <Button variant="outline" size="sm" onClick={() => handleCancelInvitation(invitation.id)}>
-                              <X className="h-3 w-3" />
-                            </Button>
-                          </>
+                  <div key={invitation.id} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Mail className="h-4 w-4 text-muted-foreground" />
+                        <span className="font-medium">{invitation.email}</span>
+                        {role && (
+                          <div className="flex items-center gap-1">
+                            {getRoleIcon(role.id)}
+                            <Badge className={role.color}>{role.name}</Badge>
+                          </div>
+                        )}
+                        {getStatusBadge(invitation.status)}
+                        {expired && invitation.status === "pending" && (
+                          <AlertTriangle className="h-4 w-4 text-orange-500" title="Convite expirado" />
                         )}
                       </div>
-                    </TableCell>
-                  </TableRow>
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />
+                          Enviado em {new Date(invitation.invitedAt).toLocaleDateString("pt-BR")}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          Expira em {new Date(invitation.expiresAt).toLocaleDateString("pt-BR")}
+                        </div>
+                        {invitation.acceptedAt && (
+                          <div className="flex items-center gap-1">
+                            <CheckCircle className="h-3 w-3" />
+                            Aceito em {new Date(invitation.acceptedAt).toLocaleDateString("pt-BR")}
+                          </div>
+                        )}
+                      </div>
+                      {invitation.message && (
+                        <div className="mt-2 p-2 bg-muted/50 rounded text-sm">
+                          <strong>Mensagem:</strong> {invitation.message}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleCopyInviteLink(invitation.token)}>
+                            <Copy className="h-4 w-4 mr-2" />
+                            Copiar Link
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <a
+                              href={`/convite/${invitation.token}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center"
+                            >
+                              <ExternalLink className="h-4 w-4 mr-2" />
+                              Abrir Link
+                            </a>
+                          </DropdownMenuItem>
+                          {canResend && (
+                            <DropdownMenuItem onClick={() => handleResendInvitation(invitation.id)}>
+                              <RefreshCw className="h-4 w-4 mr-2" />
+                              Reenviar
+                            </DropdownMenuItem>
+                          )}
+                          <DropdownMenuSeparator />
+                          {canCancel && (
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                  <Trash2 className="h-4 w-4 mr-2" />
+                                  Cancelar
+                                </DropdownMenuItem>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Cancelar Convite</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Tem certeza que deseja cancelar o convite para "{invitation.email}"?
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Não</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => handleCancelInvitation(invitation.id)}>
+                                    Sim, Cancelar
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </div>
                 )
-              })}
-            </TableBody>
-          </Table>
+              })
+            )}
+          </div>
         </CardContent>
       </Card>
     </div>

@@ -13,6 +13,7 @@ export interface Role {
   permissions: string[]
   isSystem: boolean
   color: string
+  level: number // 1 = Super, 2 = Admin, 3 = User
 }
 
 export interface User {
