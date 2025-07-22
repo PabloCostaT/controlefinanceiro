@@ -209,7 +209,7 @@ npm run start        # Executar build de produção
 npm run lint         # Verificar código com ESLint
 npm run lint:fix     # Corrigir problemas automaticamente
 npm run type-check   # Verificar tipos TypeScript
-npm run test         # Executar testes
+npm run test         # Executar testes (Jest + React Testing Library)
 npm run test:watch   # Testes em modo watch
 npm run analyze      # Analisar bundle size
 \`\`\`
